@@ -1,0 +1,61 @@
+-- 1. 创建分类表 (Category)
+CREATE TABLE `Category` (
+    `CategoryID` INT(11) NOT NULL AUTO_INCREMENT,
+    `CategoryName` VARCHAR(100) NOT NULL,
+    `Description` TEXT,
+    PRIMARY KEY (`CategoryID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 2. 创建产品表 (Product) - 关联分类表
+CREATE TABLE `Product` (
+    `ProductID` INT(11) NOT NULL AUTO_INCREMENT,
+    `Name` VARCHAR(255) NOT NULL,
+    `Description` TEXT,
+    `Price` DECIMAL(10, 2) NOT NULL,
+    `ImageURL` VARCHAR(255),
+    `CategoryID` INT(11) NOT NULL,
+    PRIMARY KEY (`ProductID`),
+    FOREIGN KEY (`CategoryID`) REFERENCES `Category`(`CategoryID`) 
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 3. 创建购物车表 (Cart)
+CREATE TABLE `Cart` (
+    `CartID` INT(11) NOT NULL AUTO_INCREMENT,
+    `SessionID` VARCHAR(255) NOT NULL,
+    `CreatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`CartID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 4. 创建购物车项表 (CartItems) - 关联购物车和产品
+CREATE TABLE `CartItems` (
+    `CartItemID` INT(11) NOT NULL AUTO_INCREMENT,
+    `CartID` INT(11) NOT NULL,
+    `ProductID` INT(11) NOT NULL,
+    `Quantity` INT(11) NOT NULL DEFAULT 1,
+    PRIMARY KEY (`CartItemID`),
+    FOREIGN KEY (`CartID`) REFERENCES `Cart`(`CartID`) ON DELETE CASCADE,
+    FOREIGN KEY (`ProductID`) REFERENCES `Product`(`ProductID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 5. 创建订单表 (Orders)
+CREATE TABLE `Orders` (
+    `OrderID` INT(11) NOT NULL AUTO_INCREMENT,
+    `OrderDate` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `TotalAmount` DECIMAL(10, 2) NOT NULL,
+    `CustomerName` VARCHAR(100) NOT NULL,
+    `Status` VARCHAR(50) DEFAULT 'Pending',
+    PRIMARY KEY (`OrderID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 6. 创建订单项表 (OrderItems) - 关联订单和产品
+CREATE TABLE `OrderItems` (
+    `OrderItemID` INT(11) NOT NULL AUTO_INCREMENT,
+    `OrderID` INT(11) NOT NULL,
+    `ProductID` INT(11) NOT NULL,
+    `Quantity` INT(11) NOT NULL,
+    `Subtotal` DECIMAL(10, 2) NOT NULL,
+    PRIMARY KEY (`OrderItemID`),
+    FOREIGN KEY (`OrderID`) REFERENCES `Orders`(`OrderID`) ON DELETE CASCADE,
+    FOREIGN KEY (`ProductID`) REFERENCES `Product`(`ProductID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
