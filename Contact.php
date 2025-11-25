@@ -1,12 +1,79 @@
 <?php 
 require 'DB.php';
 
-// --- 保持和首页一样的季节逻辑 ---
 $currentMonth = date('n'); 
+$greetingTitle = "Welcome to Our Space";
+$subTitle = "Experience the taste of nature";
 $seasonIcon = "🌿";
-// 简单的季节图标判断
-if ($currentMonth == 12) { $seasonIcon = "🎄"; } 
-elseif ($currentMonth == 1) { $seasonIcon = "✨"; }
+
+
+switch ($currentMonth) {
+    case 1: 
+        $greetingTitle = "Happy New Year";
+        $subTitle = "New beginnings, fresh tastes";
+        $seasonIcon = "✨";
+        break;
+    case 2: 
+        $greetingTitle = "Love is in the Air";
+        $subTitle = "Celebrate Valentine's Day with us";
+        $seasonIcon = "❤️";
+        break;
+    case 3: 
+        $greetingTitle = "Welcome Spring";
+        $subTitle = "Fresh flavors bloom like spring flowers";
+        $seasonIcon = "🌸";
+        break;
+    case 4: 
+        $greetingTitle = "Happy Easter";
+        $subTitle = "Egg-citing treats await you";
+        $seasonIcon = "🥚";
+        break;
+    case 5: // 五月 - 母亲节
+        $greetingTitle = "Celebrate Mom";
+        $subTitle = "Treat the special lady in your life";
+        $seasonIcon = "💐";
+        break;
+    case 6: 
+        $greetingTitle = "Hello Summer";
+        $subTitle = "Cool drinks and fresh bites";
+        $seasonIcon = "☀️";
+        break;
+    case 7: 
+        $greetingTitle = "Summer Vibes";
+        $subTitle = "Grill, chill, and enjoy";
+        $seasonIcon = "🔥";
+        break;
+    case 8: 
+        $greetingTitle = "Late Summer Treats";
+        $subTitle = "Delicious flavors before autumn";
+        $seasonIcon = "🍉";
+        break;
+    case 9: 
+        $greetingTitle = "Hello Autumn";
+        $subTitle = "Warm dishes for cozy evenings";
+        $seasonIcon = "🍂";
+        break;
+    case 10: 
+        $greetingTitle = "Spooky Halloween";
+        $subTitle = "Trick or treat with our special menu";
+        $seasonIcon = "🎃";
+        break;
+    case 11: 
+        $greetingTitle = "Happy Thanksgiving";
+        $subTitle = "Feast and gratitude";
+        $seasonIcon = "🦃";
+        break;
+    case 12: 
+        $greetingTitle = "Merry Christmas";
+        $subTitle = "Celebrate the joy of the season with us";
+        $seasonIcon = "🎄";
+        break;
+    default:
+        $greetingTitle = "Welcome to Our Space";
+        $subTitle = "Experience the taste of nature";
+        $seasonIcon = "🌿";
+        break;
+}
 ?>
 
 <!DOCTYPE html>
@@ -15,191 +82,8 @@ elseif ($currentMonth == 1) { $seasonIcon = "✨"; }
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us - Nordic Taste</title>
-
-    <style>
-        /* --- 1. 全局与基础样式 (保持一致) --- */
-        body {
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-            background-color: #0f2f2f; /* 深绿色背景 */
-            margin: 0;
-            padding: 0;
-            color: #e8f5e9;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* --- Header --- */
-        header {
-            background-color: #0b2222; 
-            padding: 15px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-
-        .brand {
-            font-size: 20px;
-            font-weight: bold;
-            color: #d0f0d0;
-            letter-spacing: 1px;
-        }
-
-        .nav-links a {
-            color: #aebcb9;
-            text-decoration: none;
-            margin-left: 25px;
-            font-size: 14px;
-            transition: color 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .nav-links a:hover {
-            color: #ffffff;
-            border-bottom: 1px solid #fff;
-        }
-
-        /* --- Contact 页面主要内容 --- */
-        .main-content {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px 20px;
-        }
-
-        .contact-container {
-            background: #163f3f;
-            width: 100%;
-            max-width: 900px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            display: flex;
-            flex-wrap: wrap; /* 手机端自动换行 */
-        }
-
-        /* 左边：图片区域 */
-        .contact-image {
-            flex: 1;
-            min-width: 300px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .contact-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-            filter: brightness(0.8);
-        }
-
-        .contact-image:hover img {
-            transform: scale(1.05);
-            filter: brightness(1);
-        }
-
-        /* 右边：信息区域 */
-        .contact-info {
-            flex: 1;
-            min-width: 300px;
-            padding: 50px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .contact-info h1 {
-            color: #d0f0d0;
-            margin-top: 0;
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-
-        .contact-info p {
-            color: #8faaa5;
-            margin-bottom: 30px;
-            font-size: 16px;
-        }
-
-        /* 联系方式列表 */
-        .contact-links {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .contact-btn {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            background: rgba(0,0,0,0.2);
-            padding: 15px 20px;
-            border-radius: 10px;
-            color: #fff;
-            transition: 0.3s;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .contact-btn:hover {
-            background: #2e7d6f;
-            transform: translateX(5px);
-            border-color: #2e7d6f;
-        }
-
-        .icon {
-            font-size: 20px;
-            margin-right: 15px;
-            width: 30px;
-            text-align: center;
-        }
-
-        .label {
-            font-size: 14px;
-            color: #aebcb9;
-            display: block;
-            margin-bottom: 2px;
-        }
-
-        .value {
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-        }
-
-        /* --- Footer (极简版) --- */
-        footer {
-            background-color: #081a1a;
-            padding: 40px 20px;
-            border-top: 1px solid #1f4f4f;
-            text-align: center;
-            color: #6c8c8c;
-        }
-
-        footer p {
-            margin: 5px 0;
-            font-size: 14px;
-            letter-spacing: 1px;
-        }
-
-        footer .fade-text {
-            font-size: 12px;
-            opacity: 0.5;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 10px;
-        }
-
-        /* 手机适配 */
-        @media (max-width: 768px) {
-            header { flex-direction: column; gap: 10px; }
-            .nav-links a { margin: 0 10px; }
-            .contact-info { padding: 30px; }
-        }
-    </style>
+    <link rel="stylesheet" href="css/contact.css">
+    <link rel="shortcut icon" href="/image/logo.png">
 </head>
 
 <body>
@@ -210,6 +94,7 @@ elseif ($currentMonth == 1) { $seasonIcon = "✨"; }
             <a href="index.php">Home</a>
             <a href="location.php">Location</a>
             <a href="contact.php" style="color: #fff; border-bottom: 1px solid #fff;">Contact Us</a>
+            <a href="about.php">About</a>
         </div>
     </header>
 

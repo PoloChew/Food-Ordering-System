@@ -1,64 +1,346 @@
 <?php
 require '../DB.php';
+if (session_status() == PHP_SESSION_NONE) { session_start(); }
 
-// 获取用户选择的模式
 $type = isset($_GET['type']) ? $_GET['type'] : "unknown";
+// ... (之前的筛选逻辑保持不变，为了节省篇幅我省略了重复的 PHP 头部逻辑，请保留你原本的 PHP 筛选代码) ...
+$search_name = isset($_GET['search_name']) ? $_GET['search_name'] : "";
+$category_id = isset($_GET['category_id']) ? $_GET['category_id'] : "";
+$min_price = isset($_GET['min_price']) ? $_GET['min_price'] : "";
+$max_price = isset($_GET['max_price']) ? $_GET['max_price'] : "";
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$limit = 10;
+$offset = ($page - 1) * $limit;
 
-// 查询所有 product
-$stmt = $pdo->query("SELECT * FROM Product");
+$whereSQL = "WHERE 1=1";
+$params = [];
+
+if (!empty($search_name)) { $whereSQL .= " AND Name LIKE :name"; $params[':name'] = "%$search_name%"; }
+if (!empty($category_id)) { $whereSQL .= " AND CategoryID = :cid"; $params[':cid'] = $category_id; }
+if (!empty($min_price)) { $whereSQL .= " AND Price >= :min"; $params[':min'] = $min_price; }
+if (!empty($max_price)) { $whereSQL .= " AND Price <= :max"; $params[':max'] = $max_price; }
+
+$countSql = "SELECT COUNT(*) FROM Product $whereSQL";
+$countStmt = $pdo->prepare($countSql);
+$countStmt->execute($params);
+$totalRows = $countStmt->fetchColumn();
+$totalPages = ceil($totalRows / $limit);
+
+$sql = "SELECT * FROM Product $whereSQL LIMIT :limit OFFSET :offset";
+$stmt = $pdo->prepare($sql);
+foreach ($params as $key => $val) { $stmt->bindValue($key, $val); }
+$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$stmtHigh = $pdo->query("SELECT * FROM Product ORDER BY Price DESC LIMIT 1");
+$mostExpensive = $stmtHigh->fetch(PDO::FETCH_ASSOC);
+$stmtSig = $pdo->query("SELECT * FROM Product ORDER BY RAND() LIMIT 1");
+$signature = $stmtSig->fetch(PDO::FETCH_ASSOC);
+$stmtCat = $pdo->query("SELECT * FROM Category");
+$categories = $stmtCat->fetchAll(PDO::FETCH_ASSOC);
+
+function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; return '?' . http_build_query($params); }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Product Page</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - Nordic Taste</title>
     <style>
-        body {
-            font-family: Arial;
-            background: #f5f5f5;
-            padding: 20px;
-        }
+        /* --- 保持之前的 CSS 样式 --- */
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0f2f2f; margin: 0; padding: 0; color: #e8f5e9; min-height: 100vh; display: flex; flex-direction: column; }
+        header { background-color: #0b2222; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .brand { font-size: 20px; font-weight: bold; color: #d0f0d0; letter-spacing: 1px; }
+        .nav-links a { color: #aebcb9; text-decoration: none; margin-left: 25px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s; }
+        .nav-links a:hover { color: #ffffff; border-bottom: 1px solid #fff; }
+        
+        /* Hero & Filter & Product Grid CSS (Keep Existing) */
+        .hero-section { padding: 40px; background: linear-gradient(to bottom, #0b2222, #0f2f2f); display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
+        .hero-card { background: rgba(255,255,255,0.05); border: 1px solid #d4af37; border-radius: 15px; padding: 20px; width: 400px; display: flex; align-items: center; box-shadow: 0 0 20px rgba(212, 175, 55, 0.1); }
+        .hero-card img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid #d4af37; margin-right: 20px; }
+        .hero-info h3 { color: #d4af37; margin: 0 0 5px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
+        .hero-info h2 { color: #fff; margin: 0 0 10px 0; font-size: 22px; }
+        .hero-info .price { color: #aebcb9; font-size: 18px; font-weight: bold; }
+        
+        .filter-bar { background: #163f3f; padding: 20px 40px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .filter-input, .filter-select { padding: 10px 15px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff; outline: none; }
+        .filter-btn { padding: 10px 25px; border-radius: 30px; background: #2e7d6f; color: #fff; border: none; cursor: pointer; transition: 0.3s; }
+        .filter-btn:hover { background: #3fa58d; }
 
-        h2 {
-            margin-bottom: 20px;
-        }
+        .product-container { padding: 40px; display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; flex: 1; }
+        .product-card { background: #163f3f; width: 250px; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: transform 0.3s; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .product-card:hover { transform: translateY(-5px); border-color: #2e7d6f; }
+        .product-card img { width: 100%; height: 180px; object-fit: cover; filter: brightness(0.9); }
+        .product-info { padding: 20px; text-align: center; }
+        .product-name { font-size: 18px; font-weight: bold; margin-bottom: 5px; color: #d0f0d0; }
+        .product-rating { color: #FFD700; font-size: 14px; margin-bottom: 10px; letter-spacing: 2px; }
+        .product-desc { font-size: 12px; color: #8faaa5; margin-bottom: 15px; height: 32px; overflow: hidden; }
+        .product-price { font-size: 20px; color: #fff; font-weight: bold; margin-bottom: 15px; }
+        .add-btn { display: inline-block; padding: 8px 25px; border: 1px solid #2e7d6f; color: #2e7d6f; border-radius: 20px; text-decoration: none; transition: 0.3s; }
+        .add-btn:hover { background: #2e7d6f; color: #fff; }
 
-        .product {
-            width: 300px;
-            background: white;
-            padding: 15px;
-            margin: 10px;
-            float: left;
-            border-radius: 10px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-        }
+        /* Pagination */
+        .pagination { display: flex; justify-content: center; padding: 20px; gap: 10px; }
+        .page-link { padding: 10px 15px; background: rgba(255,255,255,0.1); color: #fff; text-decoration: none; border-radius: 5px; transition: 0.3s; }
+        .page-link:hover, .page-link.active { background: #2e7d6f; }
+        .page-info { color: #8faaa5; align-self: center; margin: 0 10px; }
 
-        .product img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
-        }
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; display: none; justify-content: center; align-items: center; }
+        .modal-box { background: #163f3f; padding: 30px; border-radius: 20px; border: 2px solid #d4af37; max-width: 500px; width: 90%; text-align: center; position: relative; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); }
+        .product-detail-box { max-width: 800px; display: flex; flex-wrap: wrap; text-align: left; padding: 0; overflow: hidden; }
+        .detail-img-container { flex: 1; min-width: 300px; position: relative; }
+        .detail-img-container img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .detail-info-container { flex: 1; padding: 40px; min-width: 300px; display: flex; flex-direction: column; justify-content: center; }
+        
+        .modal-title { font-size: 24px; color: #d4af37; margin-bottom: 20px; }
+        .close-modal { margin-top: 20px; padding: 10px 30px; background: transparent; border: 1px solid #fff; color: #fff; cursor: pointer; border-radius: 20px; }
+        .close-modal:hover { background: #fff; color: #000; }
 
-        .name { font-size: 20px; font-weight: bold; margin-top: 10px; }
-        .price { color: green; font-size: 18px; margin-top: 5px; }
+        /* Quantity Input */
+        .qty-input { background: transparent; border: 1px solid #2e7d6f; color: #fff; padding: 10px; width: 60px; text-align: center; border-radius: 5px; font-size: 18px; margin-right: 10px; }
+
+        /* Bus Layout & Footer */
+        .bus-layout { display: grid; grid-template-columns: repeat(2, 50px) 30px repeat(2, 50px); gap: 10px; justify-content: center; margin: 20px 0; }
+        .seat { width: 50px; height: 50px; background: #2e7d6f; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
+        .seat:hover { background: #d4af37; color: #000; }
+        .aisle { grid-column: 3; }
+        footer { background: #081a1a; padding: 40px 20px; border-top: 1px solid #1f4f4f; text-align: center; color: #6c8c8c; margin-top: auto; }
+        footer p { margin: 5px 0; font-size: 14px; letter-spacing: 1px; }
+        footer .fade-text { font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; margin-top: 10px; }
     </style>
 </head>
-
 <body>
 
-<h2>Order Type: <?= ucfirst($type) ?></h2>
+    <header>
+        <div class="brand">🌿 Nordic Taste</div>
+        <div class="nav-links">
+            <a href="../index.php">Home</a>
+            <a href="cart.php">Cart</a>
+        </div>
+    </header>
 
-<?php foreach ($products as $row): ?>
-    <div class="product">
-        <img src="../image/<?= $row['ImageURL'] ?>" alt="Product Image">
-        <div class="name"><?= $row['Name'] ?></div>
-        <div class="price">RM <?= number_format($row['Price'], 2) ?></div>
+    <div id="modal-dinein" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title">Select Your Seat 🪑</div>
+            <p>Please choose a table to start ordering.</p>
+            <div class="bus-layout">
+                <div class="seat" onclick="selectSeat('A1')">A1</div> <div class="seat" onclick="selectSeat('A2')">A2</div> <div class="aisle"></div>
+                <div class="seat" onclick="selectSeat('B1')">B1</div> <div class="seat" onclick="selectSeat('B2')">B2</div>
+                <div class="seat" onclick="selectSeat('A3')">A3</div> <div class="seat" onclick="selectSeat('A4')">A4</div> <div class="aisle"></div>
+                <div class="seat" onclick="selectSeat('B3')">B3</div> <div class="seat" onclick="selectSeat('B4')">B4</div>
+            </div>
+            <div id="selected-seat-msg" style="color: #d4af37; height: 20px; margin-bottom: 10px;"></div>
+            <button class="close-modal" onclick="closeModal('modal-dinein')">Confirm Seat</button>
+        </div>
     </div>
-<?php endforeach; ?>
+
+    <div id="modal-takeaway" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title">Takeaway Counter 🛍️</div>
+            <p>Please proceed to <strong>Counter 2</strong> to collect your order.</p>
+            <p style="color: #d4af37; font-size: 24px; font-weight: bold; margin-top: 10px;">Waiting Time: ~15 mins</p>
+            <button class="close-modal" onclick="closeModal('modal-takeaway')">Start Ordering</button>
+        </div>
+    </div>
+
+    <div id="modal-product-detail" class="modal-overlay">
+        <div class="modal-box product-detail-box">
+            <div class="detail-img-container">
+                <img id="detail-img" src="" alt="Detail">
+            </div>
+            <div class="detail-info-container">
+                <h2 id="detail-name" style="color: #d4af37; font-size: 32px; margin-top: 0;"></h2>
+                <div style="color: #FFD700; font-size: 18px; margin-bottom: 15px;">★★★★★ <span style="font-size: 12px; color: #8faaa5;">(Highly Recommended)</span></div>
+                <p id="detail-desc" style="color: #aebcb9; font-size: 16px; line-height: 1.6; min-height: 60px;"></p>
+                <p id="detail-price" style="color: #fff; font-size: 36px; font-weight: bold; margin: 20px 0;"></p>
+                
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <input type="number" id="detail-qty" class="qty-input" value="1" min="1">
+                    <input type="hidden" id="detail-id"> <button onclick="addToCart()" class="add-btn" style="padding: 12px 30px; cursor: pointer;">Add to Cart</button>
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <span onclick="closeModal('modal-product-detail')" style="color: #6c8c8c; cursor: pointer; text-decoration: underline; font-size: 14px;">Close Window</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-success" class="modal-overlay">
+        <div class="modal-box">
+            <div style="font-size: 50px; margin-bottom: 10px;">✅</div>
+            <div class="modal-title" style="color: #fff;">Added to Cart!</div>
+            <p>Would you like to continue ordering?</p>
+            <div style="margin-top: 30px;">
+                <button class="close-modal" onclick="closeModal('modal-success')" style="border-color: #2e7d6f; color: #2e7d6f; margin-right: 10px;">Continue Shopping</button>
+                <a href="cart.php" class="add-btn" style="background: #2e7d6f; color: #fff; padding: 12px 30px;">Go to Cart →</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-section">
+        <?php if ($mostExpensive): ?>
+        <div class="hero-card">
+            <img src="../image/<?= $mostExpensive['ImageURL'] ?>" onerror="this.src='https://via.placeholder.com/150'" alt="Expensive">
+            <div class="hero-info">
+                <h3>👑 Most Luxurious</h3>
+                <h2><?= $mostExpensive['Name'] ?></h2>
+                <div class="price">RM <?= number_format($mostExpensive['Price'], 2) ?></div>
+            </div>
+        </div>
+        <?php endif; ?>
+        <?php if ($signature): ?>
+        <div class="hero-card" style="border-color: #2e7d6f;">
+            <img src="../image/<?= $signature['ImageURL'] ?>" onerror="this.src='https://via.placeholder.com/150'" alt="Signature" style="border-color: #2e7d6f;">
+            <div class="hero-info">
+                <h3 style="color: #2e7d6f;">👨‍🍳 Chef's Choice</h3>
+                <h2><?= $signature['Name'] ?></h2>
+                <div class="price">RM <?= number_format($signature['Price'], 2) ?></div>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <form class="filter-bar" method="GET" action="product.php">
+        <input type="hidden" name="type" value="<?= $type ?>">
+        <select name="category_id" class="filter-select">
+            <option value="">All Categories</option>
+            <?php foreach ($categories as $cat): ?>
+                <option value="<?= $cat['CategoryID'] ?>" <?= ($category_id == $cat['CategoryID']) ? 'selected' : '' ?>><?= $cat['CategoryName'] ?></option>
+            <?php endforeach; ?>
+        </select>
+        <input type="number" name="min_price" class="filter-input" placeholder="Min Price" style="width: 80px;" value="<?= $min_price ?>">
+        <input type="number" name="max_price" class="filter-input" placeholder="Max Price" style="width: 80px;" value="<?= $max_price ?>">
+        <input type="text" name="search_name" class="filter-input" placeholder="Search Food Name..." value="<?= $search_name ?>">
+        <button type="submit" class="filter-btn">Filter</button>
+    </form>
+
+    <div class="product-container">
+        <?php if (count($products) > 0): ?>
+            <?php foreach ($products as $row): ?>
+                <div class="product-card" 
+                     onclick="openProductDetail(this)"
+                     data-id="<?= $row['ProductID'] ?>" 
+                     data-name="<?= htmlspecialchars($row['Name']) ?>"
+                     data-price="<?= number_format($row['Price'], 2) ?>"
+                     data-desc="<?= htmlspecialchars($row['Description']) ?>"
+                     data-img="../image/<?= $row['ImageURL'] ?>">
+                    
+                    <img src="../image/<?= $row['ImageURL'] ?>" onerror="this.src='https://via.placeholder.com/300x200'" alt="<?= $row['Name'] ?>">
+                    <div class="product-info">
+                        <div class="product-name"><?= $row['Name'] ?></div>
+                        <div class="product-rating">★★★★½</div>
+                        <div class="product-desc"><?= $row['Description'] ?></div>
+                        <div class="product-price">RM <?= number_format($row['Price'], 2) ?></div>
+                        <span class="add-btn">View Details</span>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p style="text-align: center; width: 100%;">No products found matching your criteria.</p>
+        <?php endif; ?>
+    </div>
+
+    <?php if ($totalPages > 1): ?>
+    <div class="pagination">
+        <?php if ($page > 1): ?> <a href="<?= buildUrl($page - 1) ?>" class="page-link">← Prev</a> <?php endif; ?>
+        <span class="page-info">Page <?= $page ?> of <?= $totalPages ?></span>
+        <?php if ($page < $totalPages): ?> <a href="<?= buildUrl($page + 1) ?>" class="page-link">Next →</a> <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <footer>
+        <p>&copy; <?= date('Y') ?> Nordic Taste. All Rights Reserved.</p>
+        <p class="fade-text">Osaka • Nature • Soul</p>
+    </footer>
+
+    <script>
+        var orderType = "<?= $type ?>";
+        function setCookie(cname, cvalue, minutes) {
+            const d = new Date();
+            d.setTime(d.getTime() + (minutes * 60 * 1000));
+            let expires = "expires="+ d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+        }
+
+        function getCookie(cname) {
+            let name = cname + "=";
+            let decodedCookie = decodeURIComponent(document.cookie);
+            let ca = decodedCookie.split(';');
+            for(let i = 0; i <ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1);
+                if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+            }
+            return "";
+        }
+
+        window.onload = function() {
+            if (orderType === 'dinein') {
+                document.getElementById('modal-dinein').style.display = 'flex';
+            } else if (orderType === 'takeaway') {
+                document.getElementById('modal-takeaway').style.display = 'flex';
+            }
+        };
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function selectSeat(seatNum) {
+            document.getElementById('selected-seat-msg').innerText = "Selected Seat: " + seatNum;
+        }
+
+        function openProductDetail(card) {
+            var id = card.getAttribute('data-id');
+            var name = card.getAttribute('data-name');
+            var price = card.getAttribute('data-price');
+            var desc = card.getAttribute('data-desc');
+            var img = card.getAttribute('data-img');
+            document.getElementById('detail-id').value = id; // Set hidden ID
+            document.getElementById('detail-name').innerText = name;
+            document.getElementById('detail-price').innerText = 'RM ' + price;
+            document.getElementById('detail-desc').innerText = desc;
+            document.getElementById('detail-img').src = img;
+            document.getElementById('detail-qty').value = 1; // Reset qty
+            document.getElementById('modal-product-detail').style.display = 'flex';
+        }
+
+        // AJAX Add to Cart Logic
+        function addToCart() {
+            var productId = document.getElementById('detail-id').value;
+            var quantity = document.getElementById('detail-qty').value;
+
+            var formData = new FormData();
+            formData.append('product_id', productId);
+            formData.append('quantity', quantity);
+
+            fetch('add_to_cart.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Close detail modal, open success modal
+                    closeModal('modal-product-detail');
+                    document.getElementById('modal-success').style.display = 'flex';
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Something went wrong!');
+            });
+        }
+    </script>
 
 </body>
 </html>

@@ -81,54 +81,78 @@ switch ($currentMonth) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - The Creators</title>
     <link rel="shortcut icon" href="/image/logo.png">
-    <title>Food Order System - <?php echo $greetingTitle; ?></title>
-    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/about.css">
 </head>
 
 <body>
-
     <header>
-        <div class="brand">
-            <img src="image/logo.png" alt="Logo" class="logo">
-            <?php echo $seasonIcon; ?> My Restaurant
-        </div>
+        <div class="brand"><?php echo $seasonIcon; ?> My Restaurant</div>
         <div class="nav-links">
+            <a href="index.php">Home</a>
             <a href="location.php">Location</a>
-            <a href="Contact.php">Contact Us</a>
-            <a href="about.php">About</a>
+            <a href="contact.php">Contact Us</a>
+            <a href="about.php" style="color: #fff; border-bottom: 1px solid #fff;">About</a>
         </div>
     </header>
 
-    <div class="main-content">
-        
-        <div class="season-greeting">
-            <h1><?php echo $greetingTitle; ?></h1>
-            <p><?php echo $subTitle; ?></p>
-        </div>
-
-        <div class="scenery-gallery">
-            <div class="scenery-card">
-                <img src="https://images.unsplash.com/photo-1531366936337-7c912a4589a7?q=80&w=600&auto=format&fit=crop" alt="Aurora Borealis">
-            </div>
-            <div class="scenery-card">
-                <img src="https://images.unsplash.com/photo-1473448912268-2022ce9509d8?q=80&w=400&auto=format&fit=crop" alt="Forest">
-            </div>
-            <div class="scenery-card">
-                <img src="https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?q=80&w=600&auto=format&fit=crop" alt="Winter Mood">
-            </div>
-        </div>
-
-        <div class="action-area">
-            <h2 style="font-size: 18px; margin-bottom: 25px; color: #aebcb9; font-weight: normal;">Please select your dining preference</h2>
-            <a href="Order/product.php?type=dinein" class="btn">Dine In</a>
-            <a href="Order/product.php?type=takeaway" class="btn">Take Away</a>
+    <div class="about-hero">
+        <img src="https://images.unsplash.com/photo-1531366936337-7c912a4589a7?q=80&w=1600&auto=format&fit=crop" alt="Aurora Tech">
+        <div class="hero-content">
+            <h1>Innovation Meets Tradition</h1>
+            <p>We combine the warmth of fine dining with the precision of modern technology.</p>
         </div>
     </div>
 
+    <div class="content-container">
+
+        <div class="system-intro">
+            <h2>About The System</h2>
+            <p>
+                This <strong>Food Ordering System</strong> is designed to streamline the culinary journey. 
+                Whether you are craving an immersive <strong>Dine-in</strong> experience under the northern lights 
+                or a swift <strong>Takeaway</strong> for your urban adventures, our platform ensures a seamless, 
+                efficient, and elegant ordering process.
+            </p>
+            <p style="margin-top: 15px; font-size: 14px; opacity: 0.7;">
+                Developed as part of the Diploma in Information Technology curriculum, blending coding skills with user experience design.
+            </p>
+        </div>
+
+        <h2 class="team-title">Meet The Creators</h2>
+        
+        <div class="team-grid">
+            
+            <div class="dev-card">
+                <div class="avatar-circle">C</div> 
+                <div class="dev-name">Chew Chun Xian</div>
+                <div class="dev-role">Developer</div>
+                <div class="uni-badge">TARUMT • DFT Y2S2</div>
+            </div>
+
+            <div class="dev-card">
+                <div class="avatar-circle">W</div>
+                <div class="dev-name">Wong Jia Cheng</div>
+                <div class="dev-role">Developer</div>
+                <div class="uni-badge">TARUMT • DFT Y2S2</div>
+            </div>
+
+            <div class="dev-card">
+                <div class="avatar-circle">N</div>
+                <div class="dev-name">Ng Hong Liang</div>
+                <div class="dev-role">Developer</div>
+                <div class="uni-badge">TARUMT • DFT Y2S2</div>
+            </div>
+
+        </div>
+
+    </div>
+
     <footer>
-        <p>&copy; <?php echo date('Y'); ?> My Restaurant. All Rights Reserved.</p>
-        <p class="fade-text">Osaka • Nature • Soul</p>
+        <p>&copy; <?php echo date('Y'); ?> Nordic Taste. Proudly developed by TARUMT Students.</p>
+        <p class="fade-text">Code • Passion • Future</p>
     </footer>
+
 </body>
 </html>

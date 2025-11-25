@@ -1,9 +1,79 @@
 <?php 
 require 'DB.php';
+
 $currentMonth = date('n'); 
+$greetingTitle = "Welcome to Our Space";
+$subTitle = "Experience the taste of nature";
 $seasonIcon = "🌿";
-if ($currentMonth == 12) { $seasonIcon = "🎄"; } 
-elseif ($currentMonth == 1) { $seasonIcon = "✨"; }
+
+
+switch ($currentMonth) {
+    case 1: 
+        $greetingTitle = "Happy New Year";
+        $subTitle = "New beginnings, fresh tastes";
+        $seasonIcon = "✨";
+        break;
+    case 2: 
+        $greetingTitle = "Love is in the Air";
+        $subTitle = "Celebrate Valentine's Day with us";
+        $seasonIcon = "❤️";
+        break;
+    case 3: 
+        $greetingTitle = "Welcome Spring";
+        $subTitle = "Fresh flavors bloom like spring flowers";
+        $seasonIcon = "🌸";
+        break;
+    case 4: 
+        $greetingTitle = "Happy Easter";
+        $subTitle = "Egg-citing treats await you";
+        $seasonIcon = "🥚";
+        break;
+    case 5: // 五月 - 母亲节
+        $greetingTitle = "Celebrate Mom";
+        $subTitle = "Treat the special lady in your life";
+        $seasonIcon = "💐";
+        break;
+    case 6: 
+        $greetingTitle = "Hello Summer";
+        $subTitle = "Cool drinks and fresh bites";
+        $seasonIcon = "☀️";
+        break;
+    case 7: 
+        $greetingTitle = "Summer Vibes";
+        $subTitle = "Grill, chill, and enjoy";
+        $seasonIcon = "🔥";
+        break;
+    case 8: 
+        $greetingTitle = "Late Summer Treats";
+        $subTitle = "Delicious flavors before autumn";
+        $seasonIcon = "🍉";
+        break;
+    case 9: 
+        $greetingTitle = "Hello Autumn";
+        $subTitle = "Warm dishes for cozy evenings";
+        $seasonIcon = "🍂";
+        break;
+    case 10: 
+        $greetingTitle = "Spooky Halloween";
+        $subTitle = "Trick or treat with our special menu";
+        $seasonIcon = "🎃";
+        break;
+    case 11: 
+        $greetingTitle = "Happy Thanksgiving";
+        $subTitle = "Feast and gratitude";
+        $seasonIcon = "🦃";
+        break;
+    case 12: 
+        $greetingTitle = "Merry Christmas";
+        $subTitle = "Celebrate the joy of the season with us";
+        $seasonIcon = "🎄";
+        break;
+    default:
+        $greetingTitle = "Welcome to Our Space";
+        $subTitle = "Experience the taste of nature";
+        $seasonIcon = "🌿";
+        break;
+}
 ?>
 
 <!DOCTYPE html>
@@ -11,205 +81,18 @@ elseif ($currentMonth == 1) { $seasonIcon = "✨"; }
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/image/logo.png">
     <title>Our Location - Osaka</title>
-
-    <style>
-        body {
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-            background-color: #0f2f2f; 
-            margin: 0;
-            padding: 0;
-            color: #e8f5e9;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* --- Header 样式 --- */
-        header {
-            background-color: #0b2222; 
-            padding: 25px 60px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            border-bottom: 1px solid #1f4f4f;
-        }
-
-        .brand {
-            font-size: 28px;
-            font-weight: 700;
-            color: #d0f0d0;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-
-        .nav-links a {
-            color: #aebcb9;
-            text-decoration: none;
-            margin-left: 40px;
-            font-size: 18px;
-            font-weight: 500;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .nav-links a:hover {
-            color: #fff;
-        }
-
-        /* --- Location 页面专属样式 --- */
-        .location-hero {
-            position: relative;
-            height: 400px;
-            width: 100%;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .location-hero img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: brightness(0.6); /* 稍微变暗，为了突出文字 */
-            z-index: 1;
-        }
-
-        .hero-text {
-            position: relative;
-            z-index: 2;
-            padding: 20px;
-        }
-
-        .hero-text h1 {
-            font-size: 60px;
-            margin: 0;
-            color: #fff;
-            text-shadow: 0 0 20px rgba(46, 125, 111, 0.8);
-            letter-spacing: 3px;
-        }
-
-        .hero-text p {
-            font-size: 24px;
-            color: #d0f0d0;
-            margin-top: 15px;
-            font-weight: 300;
-        }
-
-        /* 内容容器 */
-        .content-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 60px 40px;
-            flex: 1;
-        }
-
-        .grid-layout {
-            display: flex;
-            gap: 50px;
-            flex-wrap: wrap;
-        }
-
-        .info-card {
-            flex: 1;
-            min-width: 350px;
-            background: rgba(22, 63, 63, 0.6);
-            padding: 40px;
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .info-card h2 {
-            font-size: 32px;
-            color: #d0f0d0;
-            margin-top: 0;
-            border-bottom: 2px solid #2e7d6f;
-            display: inline-block;
-            padding-bottom: 10px;
-            margin-bottom: 25px;
-        }
-
-        .info-item {
-            margin-bottom: 30px;
-            font-size: 18px;
-            line-height: 1.6;
-            color: #aebcb9;
-        }
-
-        .info-item strong {
-            color: #fff;
-            display: block;
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-
-        /* 地图容器 */
-        .map-container {
-            flex: 1.5;
-            min-width: 350px;
-            height: 500px;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-            border: 2px solid #2e7d6f;
-        }
-
-        .map-container iframe {
-            width: 100%;
-            height: 100%;
-            border: 0;
-            filter: brightness(0.95);
-        }
-
-        footer {
-            background-color: #081a1a;
-            padding: 40px 20px; /* 减少内边距 */
-            border-top: 1px solid #1f4f4f;
-            text-align: center; /* 内容居中 */
-            color: #6c8c8c;
-        }
-
-        footer p {
-            margin: 5px 0;
-            font-size: 14px;
-            letter-spacing: 1px;
-        }
-
-        footer .fade-text {
-            font-size: 12px;
-            opacity: 0.5;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 10px;
-        }
-
-        /* 手机适配 */
-        @media (max-width: 768px) {
-            header { flex-direction: column; padding: 20px; }
-            .nav-links a { margin: 10px; font-size: 16px; }
-            .hero-text h1 { font-size: 36px; }
-            .grid-layout { flex-direction: column; }
-            .map-container { height: 300px; }
-        }
-    </style>
+    <link rel="stylesheet" href="css/location.css">
 </head>
-
 <body>
-
     <header>
-        <div class="brand"><?php echo $seasonIcon; ?> Nordic Taste</div>
+        <div class="brand"><?php echo $seasonIcon; ?>Nordic Taste</div>
         <div class="nav-links">
             <a href="index.php">Home</a>
             <a href="location.php" style="color: #fff; border-bottom: 1px solid #fff;">Location</a> 
             <a href="Contact.php">Contact Us</a>
+            <a href="about.php">About</a>
         </div>
     </header>
 
@@ -242,8 +125,8 @@ elseif ($currentMonth == 1) { $seasonIcon = "✨"; }
 
                 <div class="info-item">
                     <strong>📞 Contact</strong>
-                    +358 40 123 4567<br>
-                    hello@nordic-mcd.fi
+                    +60 11 3772 1966<br>
+                    infoFoodUs@gmail.com
                 </div>
 
                 <div style="margin-top: 40px;">
