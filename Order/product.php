@@ -2,7 +2,6 @@
 require '../DB.php';
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
 
-// --- 1. 获取购物车总数量 ---
 $sessionID = session_id();
 $cartTotalQty = 0;
 try {
@@ -19,7 +18,6 @@ try {
     $cartTotalQty = 0;
 }
 
-// --- 2. 获取当前座位号 ---
 $currentSeat = isset($_COOKIE['user_seat']) ? $_COOKIE['user_seat'] : '';
 
 $type = isset($_GET['type']) ? $_GET['type'] : "unknown";
@@ -219,13 +217,13 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
     <?php endif; ?>
 
     <footer>
-        <p>&copy; <?= date('Y') ?> Nordic Taste. All Rights Reserved.</p>
+        <p>&copy; <?php echo date('Y'); ?> My Restaurant. All Rights Reserved.</p>
         <p class="fade-text">Osaka • Nature • Soul</p>
     </footer>
-
+    
     <script>
         var orderType = "<?= $type ?>";
-        var selectedSeat = ""; // 🌟 暂存座位
+        var selectedSeat = ""; 
 
         function setCookie(cname, cvalue, minutes) {
             const d = new Date();

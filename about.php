@@ -150,9 +150,8 @@ switch ($currentMonth) {
     </div>
 
     <footer>
-        <p>&copy; <?php echo date('Y'); ?> Nordic Taste. Proudly developed by TARUMT Students.</p>
-        <p class="fade-text">Code • Passion • Future</p>
+        <p>&copy; <?php echo date('Y'); ?> My Restaurant. All Rights Reserved.</p>
+        <p class="fade-text">Osaka • Nature • Soul</p>
     </footer>
-
 </body>
 </html>

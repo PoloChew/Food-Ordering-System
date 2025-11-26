@@ -28,7 +28,7 @@ switch ($currentMonth) {
         $subTitle = "Egg-citing treats await you";
         $seasonIcon = "🥚";
         break;
-    case 5: // 五月 - 母亲节
+    case 5: 
         $greetingTitle = "Celebrate Mom";
         $subTitle = "Treat the special lady in your life";
         $seasonIcon = "💐";
