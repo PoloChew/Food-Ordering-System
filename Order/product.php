@@ -2,8 +2,27 @@
 require '../DB.php';
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
 
+// --- 1. 获取购物车总数量 ---
+$sessionID = session_id();
+$cartTotalQty = 0;
+try {
+    $qtyStmt = $pdo->prepare("
+        SELECT SUM(Quantity) 
+        FROM CartItems ci 
+        JOIN Cart c ON ci.CartID = c.CartID 
+        WHERE c.SessionID = ?
+    ");
+    $qtyStmt->execute([$sessionID]);
+    $cartTotalQty = $qtyStmt->fetchColumn();
+    if (!$cartTotalQty) $cartTotalQty = 0;
+} catch (Exception $e) {
+    $cartTotalQty = 0;
+}
+
+// --- 2. 获取当前座位号 ---
+$currentSeat = isset($_COOKIE['user_seat']) ? $_COOKIE['user_seat'] : '';
+
 $type = isset($_GET['type']) ? $_GET['type'] : "unknown";
-// ... (之前的筛选逻辑保持不变，为了节省篇幅我省略了重复的 PHP 头部逻辑，请保留你原本的 PHP 筛选代码) ...
 $search_name = isset($_GET['search_name']) ? $_GET['search_name'] : "";
 $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : "";
 $min_price = isset($_GET['min_price']) ? $_GET['min_price'] : "";
@@ -52,15 +71,20 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu - Nordic Taste</title>
     <link rel="shortcut icon" href="/image/logo.png">
-    <link rel="stylesheet" href="../css/product.css">
+    <link rel="stylesheet" href="../css/product.css"> 
 </head>
 <body>
 
     <header>
         <div class="brand">🌿 Nordic Taste</div>
         <div class="nav-links">
-            <a href="../index.php">Home</a>
-            <a href="cart.php">Cart</a>
+            <a href="clear_session.php" onclick="return confirm('Going home will clear your cart and seat selection. Continue?');">Home</a>
+            <a href="cart.php">
+                Cart (<span id="cart-qty-display"><?= $cartTotalQty ?></span>)
+                <span id="header-seat-display" style="color: #FFD700; font-weight: bold; margin-left: 5px;">
+                    <?= !empty($currentSeat) ? "[$currentSeat]" : "" ?>
+                </span>
+            </a>
         </div>
     </header>
 
@@ -69,10 +93,10 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
             <div class="modal-title">Select Your Seat 🪑</div>
             <p>Please choose a table to start ordering.</p>
             <div class="bus-layout">
-                <div class="seat" onclick="selectSeat('A1')">A1</div> <div class="seat" onclick="selectSeat('A2')">A2</div> <div class="aisle"></div>
-                <div class="seat" onclick="selectSeat('B1')">B1</div> <div class="seat" onclick="selectSeat('B2')">B2</div>
-                <div class="seat" onclick="selectSeat('A3')">A3</div> <div class="seat" onclick="selectSeat('A4')">A4</div> <div class="aisle"></div>
-                <div class="seat" onclick="selectSeat('B3')">B3</div> <div class="seat" onclick="selectSeat('B4')">B4</div>
+                <div class="seat" onclick="selectSeat('A1', this)">A1</div> <div class="seat" onclick="selectSeat('A2', this)">A2</div> <div class="aisle"></div>
+                <div class="seat" onclick="selectSeat('B1', this)">B1</div> <div class="seat" onclick="selectSeat('B2', this)">B2</div>
+                <div class="seat" onclick="selectSeat('A3', this)">A3</div> <div class="seat" onclick="selectSeat('A4', this)">A4</div> <div class="aisle"></div>
+                <div class="seat" onclick="selectSeat('B3', this)">B3</div> <div class="seat" onclick="selectSeat('B4', this)">B4</div>
             </div>
             <div id="selected-seat-msg" style="color: #d4af37; height: 20px; margin-bottom: 10px;"></div>
             <button class="close-modal" onclick="closeModal('modal-dinein')">Confirm Seat</button>
@@ -117,8 +141,8 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
             <div class="modal-title" style="color: #fff;">Added to Cart!</div>
             <p>Would you like to continue ordering?</p>
             <div style="margin-top: 30px;">
-                <button class="close-modal" onclick="closeModal('modal-success')" style="border-color: #2e7d6f; color: #2e7d6f; margin-right: 10px;">Continue Shopping</button>
-                <a href="cart.php" class="add-btn" style="background: #2e7d6f; color: #fff; padding: 12px 30px;">Go to Cart →</a>
+                <button class="continue-btn" onclick="closeModal('modal-success')">⬅ Continuos Ordering</button>
+                <a href="cart.php" class="go-cart-btn">Go to Cart →</a>
             </div>
         </div>
     </div>
@@ -201,6 +225,8 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
 
     <script>
         var orderType = "<?= $type ?>";
+        var selectedSeat = ""; // 🌟 暂存座位
+
         function setCookie(cname, cvalue, minutes) {
             const d = new Date();
             d.setTime(d.getTime() + (minutes * 60 * 1000));
@@ -221,19 +247,39 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
         }
 
         window.onload = function() {
-            if (orderType === 'dinein') {
-                document.getElementById('modal-dinein').style.display = 'flex';
-            } else if (orderType === 'takeaway') {
-                document.getElementById('modal-takeaway').style.display = 'flex';
+            if (getCookie("popup_shown") === "") {
+                if (orderType === 'dinein') document.getElementById('modal-dinein').style.display = 'flex';
+                else if (orderType === 'takeaway') document.getElementById('modal-takeaway').style.display = 'flex';
             }
         };
 
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
+            
+            // 🌟 关闭弹窗时，把座位存入 Cookie，这样刷新后 Header 依然有显示
+            if(modalId === 'modal-dinein') {
+                setCookie("popup_shown", "true", 5);
+                if(selectedSeat !== "") {
+                    setCookie("user_seat", selectedSeat, 120); // 存2小时
+                    document.getElementById('header-seat-display').innerText = "[" + selectedSeat + "]";
+                }
+            } else if (modalId === 'modal-takeaway') {
+                setCookie("popup_shown", "true", 5);
+                setCookie("user_seat", "Takeaway", 120);
+                document.getElementById('header-seat-display').innerText = "[Takeaway]";
+            }
         }
 
-        function selectSeat(seatNum) {
+        // 🌟 选座逻辑更新
+        function selectSeat(seatNum, element) {
+            selectedSeat = seatNum; // 记录下来
             document.getElementById('selected-seat-msg').innerText = "Selected Seat: " + seatNum;
+            
+            var allSeats = document.querySelectorAll('.seat');
+            allSeats.forEach(function(s) {
+                s.classList.remove('selected');
+            });
+            element.classList.add('selected');
         }
 
         function openProductDetail(card) {
@@ -242,16 +288,17 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
             var price = card.getAttribute('data-price');
             var desc = card.getAttribute('data-desc');
             var img = card.getAttribute('data-img');
-            document.getElementById('detail-id').value = id; // Set hidden ID
+
+            document.getElementById('detail-id').value = id; 
             document.getElementById('detail-name').innerText = name;
             document.getElementById('detail-price').innerText = 'RM ' + price;
             document.getElementById('detail-desc').innerText = desc;
             document.getElementById('detail-img').src = img;
-            document.getElementById('detail-qty').value = 1; // Reset qty
+            document.getElementById('detail-qty').value = 1; 
+
             document.getElementById('modal-product-detail').style.display = 'flex';
         }
 
-        // AJAX Add to Cart Logic
         function addToCart() {
             var productId = document.getElementById('detail-id').value;
             var quantity = document.getElementById('detail-qty').value;
@@ -260,26 +307,23 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
             formData.append('product_id', productId);
             formData.append('quantity', quantity);
 
-            fetch('add_to_cart.php', {
-                method: 'POST',
-                body: formData
-            })
+            fetch('add_to_cart.php', { method: 'POST', body: formData })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    // Close detail modal, open success modal
                     closeModal('modal-product-detail');
                     document.getElementById('modal-success').style.display = 'flex';
+                    
+                    // 🌟 更新顶部 Header 的数量 (JS 实时更新)
+                    var currentQty = parseInt(document.getElementById('cart-qty-display').innerText);
+                    document.getElementById('cart-qty-display').innerText = currentQty + parseInt(quantity);
+
                 } else {
                     alert('Error: ' + data.message);
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Something went wrong!');
-            });
+            .catch(error => { console.error('Error:', error); alert('Something went wrong!'); });
         }
     </script>
-
 </body>
 </html>

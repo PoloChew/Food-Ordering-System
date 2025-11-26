@@ -4,7 +4,10 @@ if (session_status() == PHP_SESSION_NONE) { session_start(); }
 
 $sessionID = session_id();
 
-// 处理删除操作
+// 获取座位号
+$userSeat = isset($_COOKIE['user_seat']) ? $_COOKIE['user_seat'] : 'Not Selected';
+
+// --- 处理删除操作 ---
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
     $cartItemID = intval($_GET['id']);
     $delStmt = $pdo->prepare("DELETE FROM CartItems WHERE CartItemID = ?");
@@ -13,9 +16,26 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
     exit;
 }
 
+// --- 处理数量更新 ---
+if (isset($_GET['action']) && $_GET['action'] == 'update' && isset($_GET['id']) && isset($_GET['qty'])) {
+    $cartItemID = intval($_GET['id']);
+    $newQty = intval($_GET['qty']);
+    
+    if ($newQty > 0) {
+        $updStmt = $pdo->prepare("UPDATE CartItems SET Quantity = ? WHERE CartItemID = ?");
+        $updStmt->execute([$newQty, $cartItemID]);
+    } else {
+        $delStmt = $pdo->prepare("DELETE FROM CartItems WHERE CartItemID = ?");
+        $delStmt->execute([$cartItemID]);
+    }
+    header("Location: cart.php");
+    exit;
+}
+
 // 获取购物车内容
 $cartItems = [];
 $subtotal = 0;
+$totalQuantity = 0;
 
 $stmt = $pdo->prepare("
     SELECT ci.CartItemID, ci.Quantity, p.Name, p.Price, p.ImageURL 
@@ -27,9 +47,9 @@ $stmt = $pdo->prepare("
 $stmt->execute([$sessionID]);
 $cartItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// 计算总价
 foreach ($cartItems as $item) {
     $subtotal += $item['Price'] * $item['Quantity'];
+    $totalQuantity += $item['Quantity'];
 }
 
 $tax = $subtotal * 0.06;
@@ -42,106 +62,8 @@ $grandTotal = $subtotal + $tax;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Cart - Nordic Taste</title>
+    <link rel="stylesheet" href="../css/cart.css">
     <link rel="shortcut icon" href="/image/logo.png">
-    <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0f2f2f; margin: 0; padding: 0; color: #e8f5e9; min-height: 100vh; display: flex; flex-direction: column; }
-        header { background-color: #0b2222; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        .brand { font-size: 20px; font-weight: bold; color: #d0f0d0; letter-spacing: 1px; }
-        .nav-links a { color: #aebcb9; text-decoration: none; margin-left: 25px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s; }
-        .nav-links a:hover { color: #ffffff; border-bottom: 1px solid #fff; }
-
-        .cart-container { max-width: 800px; margin: 40px auto; padding: 20px; width: 90%; flex: 1; }
-        .cart-title { text-align: center; color: #d4af37; font-size: 32px; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
-
-        /* 购物车列表样式 */
-        .cart-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; display: flex; align-items: center; margin-bottom: 15px; transition: 0.3s; }
-        .cart-item:hover { border-color: #2e7d6f; background: rgba(255,255,255,0.08); }
-        .item-img { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; margin-right: 20px; }
-        .item-details { flex: 1; }
-        .item-name { font-size: 18px; color: #fff; font-weight: bold; margin-bottom: 5px; }
-        .item-price { color: #d4af37; font-size: 16px; }
-        .item-qty { color: #8faaa5; font-size: 14px; margin-top: 5px; }
-        .remove-btn { color: #ff6b6b; text-decoration: none; font-size: 14px; border: 1px solid rgba(255, 107, 107, 0.3); padding: 8px 15px; border-radius: 20px; transition: 0.3s; }
-        .remove-btn:hover { background: #ff6b6b; color: #fff; }
-
-        .cart-summary { background: #163f3f; padding: 30px; border-radius: 20px; margin-top: 30px; text-align: right; border: 1px solid #2e7d6f; }
-        .summary-row { color: #8faaa5; font-size: 16px; margin-bottom: 8px; display: flex; justify-content: space-between; max-width: 300px; margin-left: auto; }
-        .divider { height: 1px; background: rgba(255,255,255,0.1); margin: 15px 0; }
-        .total-price { font-size: 28px; color: #fff; font-weight: bold; margin-top: 10px; }
-        
-        .checkout-btn { display: inline-block; background: #d4af37; color: #000; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-weight: bold; margin-top: 20px; font-size: 18px; transition: 0.3s; cursor: pointer; border: none; }
-        .checkout-btn:hover { background: #fff; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4); }
-
-        .empty-cart { text-align: center; color: #8faaa5; padding: 50px; font-size: 18px; }
-
-        /* Modal Styles */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; display: none; justify-content: center; align-items: center; }
-        .modal-box { background: #163f3f; padding: 40px; border-radius: 20px; border: 2px solid #d4af37; max-width: 450px; width: 90%; text-align: center; position: relative; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); }
-        .modal-title { font-size: 24px; color: #d4af37; margin-bottom: 20px; font-weight: bold; }
-        
-        /* --- 订单摘要列表样式 (带图片) --- */
-        .order-summary-list {
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            max-height: 180px; 
-            overflow-y: auto; 
-            text-align: left;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        
-        .summary-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding: 10px 0;
-        }
-        .summary-item:last-child { border-bottom: none; }
-
-        .summary-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; margin-right: 15px; border: 1px solid #d4af37; }
-        .summary-details { flex: 1; }
-        .summary-name { color: #fff; font-size: 14px; font-weight: bold; }
-        .summary-qty { color: #8faaa5; font-size: 12px; }
-        .summary-price { color: #d4af37; font-weight: bold; font-size: 14px; }
-        
-        /* --- 新增：价格明细区域样式 --- */
-        .price-breakdown {
-            border-top: 1px solid rgba(255,255,255,0.2);
-            padding-top: 15px;
-            margin-bottom: 20px;
-        }
-        .breakdown-row {
-            display: flex;
-            justify-content: space-between;
-            color: #aebcb9;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-        .breakdown-total {
-            display: flex;
-            justify-content: space-between;
-            color: #fff;
-            font-weight: bold;
-            font-size: 20px;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .form-group { text-align: left; margin-bottom: 20px; }
-        .form-group label { display: block; color: #aebcb9; margin-bottom: 8px; font-size: 14px; }
-        .form-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; font-size: 16px; box-sizing: border-box; outline: none; }
-        .form-input:focus { border-color: #d4af37; }
-
-        .close-modal { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #6c8c8c; font-size: 24px; cursor: pointer; }
-        .close-modal:hover { color: #fff; }
-
-        footer { background: #081a1a; padding: 40px 20px; border-top: 1px solid #1f4f4f; text-align: center; color: #6c8c8c; margin-top: auto; }
-        footer p { margin: 5px 0; font-size: 14px; letter-spacing: 1px; }
-        footer .fade-text { font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; margin-top: 10px; }
-    </style>
 </head>
 <body>
 
@@ -156,6 +78,18 @@ $grandTotal = $subtotal + $tax;
     <div class="cart-container">
         <h1 class="cart-title">Your Selection</h1>
 
+        <div class="cart-info-bar">
+            <div class="info-item">
+                <span>📦 Total Items:</span>
+                <strong><?= $totalQuantity ?></strong>
+            </div>
+            <div style="width: 1px; background: rgba(255,255,255,0.2); height: 20px;"></div>
+            <div class="info-item">
+                <span>🪑 Seat:</span>
+                <strong style="color: #d4af37;"><?= htmlspecialchars($userSeat) ?></strong>
+            </div>
+        </div>
+
         <?php if (count($cartItems) > 0): ?>
             <?php foreach ($cartItems as $item): ?>
                 <div class="cart-item">
@@ -163,8 +97,14 @@ $grandTotal = $subtotal + $tax;
                     <div class="item-details">
                         <div class="item-name"><?= $item['Name'] ?></div>
                         <div class="item-price">RM <?= number_format($item['Price'], 2) ?></div>
-                        <div class="item-qty">Qty: <?= $item['Quantity'] ?></div>
+                        
+                        <div class="qty-control">
+                            <a href="cart.php?action=update&id=<?= $item['CartItemID'] ?>&qty=<?= $item['Quantity'] - 1 ?>" class="qty-btn">-</a>
+                            <span class="item-qty-text"><?= $item['Quantity'] ?></span>
+                            <a href="cart.php?action=update&id=<?= $item['CartItemID'] ?>&qty=<?= $item['Quantity'] + 1 ?>" class="qty-btn">+</a>
+                        </div>
                     </div>
+                    
                     <div style="text-align: right;">
                         <div style="font-size: 18px; color: #fff; font-weight: bold; margin-bottom: 10px;">
                             RM <?= number_format($item['Price'] * $item['Quantity'], 2) ?>
@@ -202,19 +142,19 @@ $grandTotal = $subtotal + $tax;
     <div id="modal-checkout" class="modal-overlay">
         <div class="modal-box">
             <button class="close-modal" onclick="closeModal('modal-checkout')">&times;</button>
-            <div class="modal-title">Finalize Order</div>
+            <div class="modal-title">Checkout & Pay</div>
             
-            <p style="text-align: left; color: #d4af37; font-size: 14px; margin-bottom: 10px;">Order Summary</p>
+            <p style="text-align: left; color: #d4af37; font-size: 14px; margin-bottom: 5px;">Order Summary</p>
             
-            <div class="order-summary-list">
+            <div class="modal-summary-list">
                 <?php foreach ($cartItems as $item): ?>
-                    <div class="summary-item">
-                        <img src="../image/<?= $item['ImageURL'] ?>" onerror="this.src='https://via.placeholder.com/50'" class="summary-img">
-                        <div class="summary-details">
-                            <div class="summary-name"><?= $item['Name'] ?></div>
-                            <div class="summary-qty">x<?= $item['Quantity'] ?></div>
+                    <div class="modal-item">
+                        <img src="../image/<?= $item['ImageURL'] ?>" onerror="this.src='https://via.placeholder.com/50'" class="modal-img">
+                        <div class="modal-info">
+                            <div><?= $item['Name'] ?></div>
+                            <small>Qty: <?= $item['Quantity'] ?></small>
                         </div>
-                        <div class="summary-price">RM <?= number_format($item['Price'] * $item['Quantity'], 2) ?></div>
+                        <div class="modal-price">RM <?= number_format($item['Price'] * $item['Quantity'], 2) ?></div>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -241,19 +181,91 @@ $grandTotal = $subtotal + $tax;
 
             <div class="form-group">
                 <label>Table Number</label>
-                <input type="text" id="table_num" class="form-input" placeholder="e.g., A1, B2">
+                <input type="text" id="table_num" class="form-input" value="<?= htmlspecialchars($userSeat) ?>" readonly style="background: rgba(255,255,255,0.1); color: #8faaa5; cursor: not-allowed;">
             </div>
 
-            <button onclick="submitOrder()" class="checkout-btn" style="width: 100%;">Confirm Order</button>
+            <div class="form-group">
+                <label>Payment Method</label>
+                <select id="payment_method" class="form-input" onchange="togglePaymentFields()">
+                    <option value="">-- Select Method --</option>
+                    <option value="Cash">💵 Cash</option>
+                    <option value="E-wallet">📱 TNG E-Wallet</option>
+                    <option value="Online Banking">🏦 Online Banking</option>
+                </select>
+            </div>
+
+            <div id="ewallet-section" class="payment-section hidden">
+                <div style="text-align: center;">
+                    <img src="../image/tng.jpg" alt="TNG" class="ewallet-logo">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number (Malaysia)</label>
+                    <input type="text" id="ewallet_phone" class="form-input" placeholder="012-3456789">
+                </div>
+                <div class="form-group">
+                    <label>6-Digit PIN</label>
+                    <input type="password" id="ewallet_pin" class="form-input" maxlength="6" placeholder="******">
+                </div>
+            </div>
+
+            <div id="bank-section" class="payment-section hidden">
+                <div class="form-group">
+                    <label>Select Bank</label>
+                    <input type="hidden" id="bank_name">
+                    
+                    <div class="bank-grid">
+                        <div class="bank-option" onclick="selectBank(this, 'Maybank2u')">
+                            <img src="../image/maybank.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <span>Maybank</span>
+                        </div>
+                        <div class="bank-option" onclick="selectBank(this, 'CIMB Clicks')">
+                            <img src="../image/cimb.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <span>CIMB</span>
+                        </div>
+                        <div class="bank-option" onclick="selectBank(this, 'Public Bank')">
+                            <img src="../image/publicbank.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <span>Public</span>
+                        </div>
+                        <div class="bank-option" onclick="selectBank(this, 'RHB Now')">
+                            <img src="../image/rhb.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <span>RHB</span>
+                        </div>
+                        <div class="bank-option" onclick="selectBank(this, 'Hong Leong')">
+                            <img src="../image/hongleong.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <span>HongLeong</span>
+                        </div>
+                        <div class="bank-option" onclick="selectBank(this, 'AmBank')">
+                            <img src="../image/ambank.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <span>AmBank</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Account Number</label>
+                    <input type="text" id="bank_acc" class="form-input" placeholder="Enter Account No.">
+                </div>
+                <div class="form-group">
+                    <label>Bank PIN</label>
+                    <input type="password" id="bank_pin" class="form-input" placeholder="Enter PIN">
+                </div>
+            </div>
+
+            <div class="form-group verify-box" style="margin-top: 20px;">
+                <label style="color: #d4af37;">Human Verify: 12 + 8 = ?</label>
+                <input type="number" id="human_ans" class="form-input" style="border: 1px solid #d4af37;" placeholder="Enter Answer">
+            </div>
+
+            <button onclick="submitOrder()" class="checkout-btn" style="width: 100%; margin-top:20px;">Confirm & Pay</button>
         </div>
     </div>
-
+    
     <div id="modal-success" class="modal-overlay">
         <div class="modal-box">
-            <div style="font-size: 60px; margin-bottom: 15px;">🎉</div>
-            <div class="modal-title" style="color: #fff;">Order Placed!</div>
-            <p style="color: #aebcb9;">Thank you for dining with Nordic Taste.</p>
-            <p style="color: #aebcb9;">The kitchen is preparing your meal.</p>
+            <div id="success-icon" style="font-size: 60px; margin-bottom: 15px;">🎉</div>
+            <div id="success-title" class="modal-title" style="color: #fff;">Order Placed!</div>
+            
+            <div id="success-message-container"></div>
+
             <div style="margin-top: 30px;">
                 <a href="../index.php" class="checkout-btn" style="background: #2e7d6f; color: #fff; text-decoration: none; display: block;">Back to Home</a>
             </div>
@@ -274,18 +286,80 @@ $grandTotal = $subtotal + $tax;
             document.getElementById(modalId).style.display = 'none';
         }
 
+        function togglePaymentFields() {
+            var method = document.getElementById('payment_method').value;
+            
+            document.getElementById('ewallet-section').classList.add('hidden');
+            document.getElementById('bank-section').classList.add('hidden');
+
+            if(method === 'E-wallet') {
+                document.getElementById('ewallet-section').classList.remove('hidden');
+            } else if (method === 'Online Banking') {
+                document.getElementById('bank-section').classList.remove('hidden');
+            }
+        }
+
+        function selectBank(element, bankName) {
+            document.getElementById('bank_name').value = bankName;
+            var options = document.querySelectorAll('.bank-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
         function submitOrder() {
             var name = document.getElementById('cust_name').value;
             var table = document.getElementById('table_num').value;
+            var method = document.getElementById('payment_method').value;
+            var verify = document.getElementById('human_ans').value;
 
-            if(name === "" || table === "") {
-                alert("Please fill in your Name and Table Number.");
+            if(name === "" || method === "") {
+                alert("Please enter Name and select Payment Method.");
+                return;
+            }
+
+            if(verify !== "20") {
+                alert("Wrong Human Verify answer! (Hint: 12 + 8 = 20)");
                 return;
             }
 
             var formData = new FormData();
             formData.append('name', name);
             formData.append('table', table);
+            formData.append('method', method);
+
+            if (method === 'E-wallet') {
+                var phone = document.getElementById('ewallet_phone').value;
+                var pin = document.getElementById('ewallet_pin').value;
+                var phoneRegex = /^01[0-9]-?[0-9]{7,8}$/;
+                
+                if(!phoneRegex.test(phone)) {
+                    alert("Invalid Malaysia Phone Number format.");
+                    return;
+                }
+                if(pin.length !== 6 || isNaN(pin)) {
+                    alert("TNG PIN must be exactly 6 digits.");
+                    return;
+                }
+                formData.append('phone', phone);
+                formData.append('pin', pin);
+
+            } else if (method === 'Online Banking') {
+                var bank = document.getElementById('bank_name').value;
+                var acc = document.getElementById('bank_acc').value;
+                var bPin = document.getElementById('bank_pin').value;
+
+                if(bank === "") {
+                    alert("Please select a Bank by clicking on the logo.");
+                    return;
+                }
+                if(acc === "" || bPin === "") {
+                    alert("Please fill in Bank Account and PIN.");
+                    return;
+                }
+                formData.append('bank', bank);
+                formData.append('account', acc);
+                formData.append('pin', bPin);
+            }
 
             fetch('checkout_process.php', {
                 method: 'POST',
@@ -295,6 +369,29 @@ $grandTotal = $subtotal + $tax;
             .then(data => {
                 if (data.status === 'success') {
                     closeModal('modal-checkout');
+                    
+                    var successContainer = document.getElementById('success-message-container');
+                    var title = document.getElementById('success-title');
+                    var icon = document.getElementById('success-icon');
+
+                    if(data.payment_status === 'Pending') {
+                        icon.innerHTML = "📝";
+                        title.innerText = "Order Pending Payment";
+                        title.style.color = "#d4af37";
+                        successContainer.innerHTML = `
+                            <p style="color: #fff; font-size: 18px; margin-bottom: 10px;">Please proceed to the counter to pay.</p>
+                            <p style="color: #aebcb9;">Enjoy your meal and welcome again!</p>
+                        `;
+                    } else {
+                        icon.innerHTML = "🎉";
+                        title.innerText = "Payment Successful!";
+                        title.style.color = "#4CAF50";
+                        successContainer.innerHTML = `
+                            <p style="color: #aebcb9;">Thank you for dining with Nordic Taste.</p>
+                            <p style="color: #aebcb9;">The kitchen is preparing your meal.</p>
+                        `;
+                    }
+
                     document.getElementById('modal-success').style.display = 'flex';
                 } else {
                     alert('Error: ' + data.message);

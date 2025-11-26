@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 26, 2025 at 04:12 AM
+-- Generation Time: Nov 26, 2025 at 07:19 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -114,7 +114,25 @@ INSERT INTO `orderitems` (`OrderItemID`, `OrderID`, `ProductID`, `Quantity`, `Su
 (5, 3, 1, 2, 31.80),
 (6, 3, 16, 3, 50.70),
 (7, 3, 27, 1, 558.00),
-(8, 3, 32, 3, 294.00);
+(8, 3, 32, 3, 294.00),
+(9, 4, 2, 1, 13.50),
+(10, 5, 2, 1, 13.50),
+(11, 5, 7, 2, 25.80),
+(12, 5, 19, 1, 12.50),
+(13, 5, 20, 1, 4.90),
+(14, 5, 23, 1, 188.00),
+(15, 6, 3, 1, 16.90),
+(16, 6, 8, 1, 16.50),
+(17, 6, 9, 1, 10.90),
+(18, 7, 17, 1, 32.90),
+(19, 7, 16, 1, 16.90),
+(20, 7, 13, 1, 21.90),
+(21, 8, 4, 12, 178.80),
+(22, 8, 2, 7, 94.50),
+(23, 8, 7, 4, 51.60),
+(24, 9, 21, 1, 198.00),
+(25, 9, 30, 2, 256.00),
+(26, 9, 41, 2, 49.00);
 
 -- --------------------------------------------------------
 
@@ -128,6 +146,7 @@ CREATE TABLE `orders` (
   `TotalAmount` decimal(10,2) NOT NULL,
   `CustomerName` varchar(100) NOT NULL,
   `TableNumber` varchar(50) NOT NULL,
+  `PaymentMethod` varchar(50) NOT NULL,
   `Status` varchar(50) DEFAULT 'Pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -135,10 +154,16 @@ CREATE TABLE `orders` (
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`OrderID`, `OrderDate`, `TotalAmount`, `CustomerName`, `TableNumber`, `Status`) VALUES
-(1, '2025-11-26 01:59:29', 60.31, 'NG HONG LIANG', 'A1', 'Pending'),
-(2, '2025-11-26 02:02:53', 69.54, 'NG HONG LIANG', 'A1', 'Pending'),
-(3, '2025-11-26 02:10:52', 990.57, 'Wong Jia Cheng', 'B2', 'Pending');
+INSERT INTO `orders` (`OrderID`, `OrderDate`, `TotalAmount`, `CustomerName`, `TableNumber`, `PaymentMethod`, `Status`) VALUES
+(1, '2025-11-26 01:59:29', 60.31, 'NG HONG LIANG', 'A1', '', 'Pending'),
+(2, '2025-11-26 02:02:53', 69.54, 'NG HONG LIANG', 'A1', '', 'Pending'),
+(3, '2025-11-26 02:10:52', 990.57, 'Wong Jia Cheng', 'B2', '', 'Pending'),
+(4, '2025-11-26 04:44:30', 14.31, 'hgfdrth', 'A1', '', 'Pending'),
+(5, '2025-11-26 05:01:54', 259.38, 'NG HONG LIANG', 'A1', '', 'Pending'),
+(6, '2025-11-26 05:03:42', 46.96, 'NG HONG LIANG', 'A1', '', 'Pending'),
+(7, '2025-11-26 05:41:28', 76.00, 'NG HONG LIANG', 'B4', 'E-wallet', 'Successfully'),
+(8, '2025-11-26 05:42:28', 344.39, 'NG HONG LIANG', 'B1', 'Online Banking', 'Successfully'),
+(9, '2025-11-26 06:07:49', 533.18, 'NG HONG LIANG', 'B3', 'Online Banking', 'Successfully');
 
 -- --------------------------------------------------------
 
@@ -256,13 +281,13 @@ ALTER TABLE `product`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `CartID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `CartID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `cartitems`
 --
 ALTER TABLE `cartitems`
-  MODIFY `CartItemID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `CartItemID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
 
 --
 -- AUTO_INCREMENT for table `category`
@@ -274,13 +299,13 @@ ALTER TABLE `category`
 -- AUTO_INCREMENT for table `orderitems`
 --
 ALTER TABLE `orderitems`
-  MODIFY `OrderItemID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `OrderItemID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `OrderID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `OrderID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `product`
