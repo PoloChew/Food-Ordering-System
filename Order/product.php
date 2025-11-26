@@ -51,69 +51,8 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu - Nordic Taste</title>
-    <style>
-        /* --- 保持之前的 CSS 样式 --- */
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0f2f2f; margin: 0; padding: 0; color: #e8f5e9; min-height: 100vh; display: flex; flex-direction: column; }
-        header { background-color: #0b2222; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        .brand { font-size: 20px; font-weight: bold; color: #d0f0d0; letter-spacing: 1px; }
-        .nav-links a { color: #aebcb9; text-decoration: none; margin-left: 25px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s; }
-        .nav-links a:hover { color: #ffffff; border-bottom: 1px solid #fff; }
-        
-        /* Hero & Filter & Product Grid CSS (Keep Existing) */
-        .hero-section { padding: 40px; background: linear-gradient(to bottom, #0b2222, #0f2f2f); display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
-        .hero-card { background: rgba(255,255,255,0.05); border: 1px solid #d4af37; border-radius: 15px; padding: 20px; width: 400px; display: flex; align-items: center; box-shadow: 0 0 20px rgba(212, 175, 55, 0.1); }
-        .hero-card img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid #d4af37; margin-right: 20px; }
-        .hero-info h3 { color: #d4af37; margin: 0 0 5px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
-        .hero-info h2 { color: #fff; margin: 0 0 10px 0; font-size: 22px; }
-        .hero-info .price { color: #aebcb9; font-size: 18px; font-weight: bold; }
-        
-        .filter-bar { background: #163f3f; padding: 20px 40px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .filter-input, .filter-select { padding: 10px 15px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff; outline: none; }
-        .filter-btn { padding: 10px 25px; border-radius: 30px; background: #2e7d6f; color: #fff; border: none; cursor: pointer; transition: 0.3s; }
-        .filter-btn:hover { background: #3fa58d; }
-
-        .product-container { padding: 40px; display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; flex: 1; }
-        .product-card { background: #163f3f; width: 250px; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: transform 0.3s; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
-        .product-card:hover { transform: translateY(-5px); border-color: #2e7d6f; }
-        .product-card img { width: 100%; height: 180px; object-fit: cover; filter: brightness(0.9); }
-        .product-info { padding: 20px; text-align: center; }
-        .product-name { font-size: 18px; font-weight: bold; margin-bottom: 5px; color: #d0f0d0; }
-        .product-rating { color: #FFD700; font-size: 14px; margin-bottom: 10px; letter-spacing: 2px; }
-        .product-desc { font-size: 12px; color: #8faaa5; margin-bottom: 15px; height: 32px; overflow: hidden; }
-        .product-price { font-size: 20px; color: #fff; font-weight: bold; margin-bottom: 15px; }
-        .add-btn { display: inline-block; padding: 8px 25px; border: 1px solid #2e7d6f; color: #2e7d6f; border-radius: 20px; text-decoration: none; transition: 0.3s; }
-        .add-btn:hover { background: #2e7d6f; color: #fff; }
-
-        /* Pagination */
-        .pagination { display: flex; justify-content: center; padding: 20px; gap: 10px; }
-        .page-link { padding: 10px 15px; background: rgba(255,255,255,0.1); color: #fff; text-decoration: none; border-radius: 5px; transition: 0.3s; }
-        .page-link:hover, .page-link.active { background: #2e7d6f; }
-        .page-info { color: #8faaa5; align-self: center; margin: 0 10px; }
-
-        /* Modals */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; display: none; justify-content: center; align-items: center; }
-        .modal-box { background: #163f3f; padding: 30px; border-radius: 20px; border: 2px solid #d4af37; max-width: 500px; width: 90%; text-align: center; position: relative; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); }
-        .product-detail-box { max-width: 800px; display: flex; flex-wrap: wrap; text-align: left; padding: 0; overflow: hidden; }
-        .detail-img-container { flex: 1; min-width: 300px; position: relative; }
-        .detail-img-container img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .detail-info-container { flex: 1; padding: 40px; min-width: 300px; display: flex; flex-direction: column; justify-content: center; }
-        
-        .modal-title { font-size: 24px; color: #d4af37; margin-bottom: 20px; }
-        .close-modal { margin-top: 20px; padding: 10px 30px; background: transparent; border: 1px solid #fff; color: #fff; cursor: pointer; border-radius: 20px; }
-        .close-modal:hover { background: #fff; color: #000; }
-
-        /* Quantity Input */
-        .qty-input { background: transparent; border: 1px solid #2e7d6f; color: #fff; padding: 10px; width: 60px; text-align: center; border-radius: 5px; font-size: 18px; margin-right: 10px; }
-
-        /* Bus Layout & Footer */
-        .bus-layout { display: grid; grid-template-columns: repeat(2, 50px) 30px repeat(2, 50px); gap: 10px; justify-content: center; margin: 20px 0; }
-        .seat { width: 50px; height: 50px; background: #2e7d6f; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
-        .seat:hover { background: #d4af37; color: #000; }
-        .aisle { grid-column: 3; }
-        footer { background: #081a1a; padding: 40px 20px; border-top: 1px solid #1f4f4f; text-align: center; color: #6c8c8c; margin-top: auto; }
-        footer p { margin: 5px 0; font-size: 14px; letter-spacing: 1px; }
-        footer .fade-text { font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; margin-top: 10px; }
-    </style>
+    <link rel="shortcut icon" href="/image/logo.png">
+    <link rel="stylesheet" href="../css/product.css">
 </head>
 <body>
 

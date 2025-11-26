@@ -1,11 +1,10 @@
 <?php
-// Order/cart.php
 require '../DB.php';
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
 
 $sessionID = session_id();
 
-// Handle Delete Action
+// 处理删除操作
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
     $cartItemID = intval($_GET['id']);
     $delStmt = $pdo->prepare("DELETE FROM CartItems WHERE CartItemID = ?");
@@ -14,9 +13,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
     exit;
 }
 
-// Fetch Cart Items
+// 获取购物车内容
 $cartItems = [];
-$totalPrice = 0;
+$subtotal = 0;
 
 $stmt = $pdo->prepare("
     SELECT ci.CartItemID, ci.Quantity, p.Name, p.Price, p.ImageURL 
@@ -28,9 +27,13 @@ $stmt = $pdo->prepare("
 $stmt->execute([$sessionID]);
 $cartItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// 计算总价
 foreach ($cartItems as $item) {
-    $totalPrice += $item['Price'] * $item['Quantity'];
+    $subtotal += $item['Price'] * $item['Quantity'];
 }
+
+$tax = $subtotal * 0.06;
+$grandTotal = $subtotal + $tax;
 ?>
 
 <!DOCTYPE html>
@@ -39,6 +42,7 @@ foreach ($cartItems as $item) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Cart - Nordic Taste</title>
+    <link rel="shortcut icon" href="/image/logo.png">
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0f2f2f; margin: 0; padding: 0; color: #e8f5e9; min-height: 100vh; display: flex; flex-direction: column; }
         header { background-color: #0b2222; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
@@ -46,72 +50,93 @@ foreach ($cartItems as $item) {
         .nav-links a { color: #aebcb9; text-decoration: none; margin-left: 25px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s; }
         .nav-links a:hover { color: #ffffff; border-bottom: 1px solid #fff; }
 
-        .cart-container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-            width: 90%;
-            flex: 1;
-        }
-
+        .cart-container { max-width: 800px; margin: 40px auto; padding: 20px; width: 90%; flex: 1; }
         .cart-title { text-align: center; color: #d4af37; font-size: 32px; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
 
-        .cart-item {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            transition: 0.3s;
-        }
-        
+        /* 购物车列表样式 */
+        .cart-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; display: flex; align-items: center; margin-bottom: 15px; transition: 0.3s; }
         .cart-item:hover { border-color: #2e7d6f; background: rgba(255,255,255,0.08); }
-
         .item-img { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; margin-right: 20px; }
-        
         .item-details { flex: 1; }
         .item-name { font-size: 18px; color: #fff; font-weight: bold; margin-bottom: 5px; }
         .item-price { color: #d4af37; font-size: 16px; }
         .item-qty { color: #8faaa5; font-size: 14px; margin-top: 5px; }
-
-        .remove-btn {
-            color: #ff6b6b;
-            text-decoration: none;
-            font-size: 14px;
-            border: 1px solid rgba(255, 107, 107, 0.3);
-            padding: 8px 15px;
-            border-radius: 20px;
-            transition: 0.3s;
-        }
+        .remove-btn { color: #ff6b6b; text-decoration: none; font-size: 14px; border: 1px solid rgba(255, 107, 107, 0.3); padding: 8px 15px; border-radius: 20px; transition: 0.3s; }
         .remove-btn:hover { background: #ff6b6b; color: #fff; }
 
-        .cart-summary {
-            background: #163f3f;
-            padding: 30px;
-            border-radius: 20px;
-            margin-top: 30px;
-            text-align: right;
-            border: 1px solid #2e7d6f;
-        }
-
-        .total-price { font-size: 28px; color: #fff; font-weight: bold; }
-        .checkout-btn {
-            display: inline-block;
-            background: #d4af37;
-            color: #000;
-            padding: 15px 40px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: bold;
-            margin-top: 20px;
-            font-size: 18px;
-            transition: 0.3s;
-        }
+        .cart-summary { background: #163f3f; padding: 30px; border-radius: 20px; margin-top: 30px; text-align: right; border: 1px solid #2e7d6f; }
+        .summary-row { color: #8faaa5; font-size: 16px; margin-bottom: 8px; display: flex; justify-content: space-between; max-width: 300px; margin-left: auto; }
+        .divider { height: 1px; background: rgba(255,255,255,0.1); margin: 15px 0; }
+        .total-price { font-size: 28px; color: #fff; font-weight: bold; margin-top: 10px; }
+        
+        .checkout-btn { display: inline-block; background: #d4af37; color: #000; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-weight: bold; margin-top: 20px; font-size: 18px; transition: 0.3s; cursor: pointer; border: none; }
         .checkout-btn:hover { background: #fff; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4); }
 
         .empty-cart { text-align: center; color: #8faaa5; padding: 50px; font-size: 18px; }
+
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; display: none; justify-content: center; align-items: center; }
+        .modal-box { background: #163f3f; padding: 40px; border-radius: 20px; border: 2px solid #d4af37; max-width: 450px; width: 90%; text-align: center; position: relative; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); }
+        .modal-title { font-size: 24px; color: #d4af37; margin-bottom: 20px; font-weight: bold; }
+        
+        /* --- 订单摘要列表样式 (带图片) --- */
+        .order-summary-list {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            max-height: 180px; 
+            overflow-y: auto; 
+            text-align: left;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .summary-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 0;
+        }
+        .summary-item:last-child { border-bottom: none; }
+
+        .summary-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; margin-right: 15px; border: 1px solid #d4af37; }
+        .summary-details { flex: 1; }
+        .summary-name { color: #fff; font-size: 14px; font-weight: bold; }
+        .summary-qty { color: #8faaa5; font-size: 12px; }
+        .summary-price { color: #d4af37; font-weight: bold; font-size: 14px; }
+        
+        /* --- 新增：价格明细区域样式 --- */
+        .price-breakdown {
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 15px;
+            margin-bottom: 20px;
+        }
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            color: #aebcb9;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .breakdown-total {
+            display: flex;
+            justify-content: space-between;
+            color: #fff;
+            font-weight: bold;
+            font-size: 20px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .form-group { text-align: left; margin-bottom: 20px; }
+        .form-group label { display: block; color: #aebcb9; margin-bottom: 8px; font-size: 14px; }
+        .form-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; font-size: 16px; box-sizing: border-box; outline: none; }
+        .form-input:focus { border-color: #d4af37; }
+
+        .close-modal { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #6c8c8c; font-size: 24px; cursor: pointer; }
+        .close-modal:hover { color: #fff; }
 
         footer { background: #081a1a; padding: 40px 20px; border-top: 1px solid #1f4f4f; text-align: center; color: #6c8c8c; margin-top: auto; }
         footer p { margin: 5px 0; font-size: 14px; letter-spacing: 1px; }
@@ -150,9 +175,20 @@ foreach ($cartItems as $item) {
             <?php endforeach; ?>
 
             <div class="cart-summary">
-                <div style="color: #8faaa5; margin-bottom: 10px;">Total Amount</div>
-                <div class="total-price">RM <?= number_format($totalPrice, 2) ?></div>
-                <a href="#" class="checkout-btn">Proceed to Checkout</a>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>RM <?= number_format($subtotal, 2) ?></span>
+                </div>
+                <div class="summary-row">
+                    <span>Service Tax (6%)</span>
+                    <span>RM <?= number_format($tax, 2) ?></span>
+                </div>
+                <div class="divider"></div>
+                <div class="summary-row">
+                    <span style="color: #fff; font-weight: bold;">Total</span>
+                    <span class="total-price" style="font-size: 24px;">RM <?= number_format($grandTotal, 2) ?></span>
+                </div>
+                <button onclick="openCheckoutModal()" class="checkout-btn">Proceed to Checkout</button>
             </div>
 
         <?php else: ?>
@@ -163,10 +199,113 @@ foreach ($cartItems as $item) {
         <?php endif; ?>
     </div>
 
+    <div id="modal-checkout" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-checkout')">&times;</button>
+            <div class="modal-title">Finalize Order</div>
+            
+            <p style="text-align: left; color: #d4af37; font-size: 14px; margin-bottom: 10px;">Order Summary</p>
+            
+            <div class="order-summary-list">
+                <?php foreach ($cartItems as $item): ?>
+                    <div class="summary-item">
+                        <img src="../image/<?= $item['ImageURL'] ?>" onerror="this.src='https://via.placeholder.com/50'" class="summary-img">
+                        <div class="summary-details">
+                            <div class="summary-name"><?= $item['Name'] ?></div>
+                            <div class="summary-qty">x<?= $item['Quantity'] ?></div>
+                        </div>
+                        <div class="summary-price">RM <?= number_format($item['Price'] * $item['Quantity'], 2) ?></div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <div class="price-breakdown">
+                <div class="breakdown-row">
+                    <span>Subtotal</span>
+                    <span>RM <?= number_format($subtotal, 2) ?></span>
+                </div>
+                <div class="breakdown-row">
+                    <span>Service Tax (6%)</span>
+                    <span>RM <?= number_format($tax, 2) ?></span>
+                </div>
+                <div class="breakdown-total">
+                    <span>Total Amount</span>
+                    <span style="color: #d4af37;">RM <?= number_format($grandTotal, 2) ?></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Customer Name</label>
+                <input type="text" id="cust_name" class="form-input" placeholder="Enter your name">
+            </div>
+
+            <div class="form-group">
+                <label>Table Number</label>
+                <input type="text" id="table_num" class="form-input" placeholder="e.g., A1, B2">
+            </div>
+
+            <button onclick="submitOrder()" class="checkout-btn" style="width: 100%;">Confirm Order</button>
+        </div>
+    </div>
+
+    <div id="modal-success" class="modal-overlay">
+        <div class="modal-box">
+            <div style="font-size: 60px; margin-bottom: 15px;">🎉</div>
+            <div class="modal-title" style="color: #fff;">Order Placed!</div>
+            <p style="color: #aebcb9;">Thank you for dining with Nordic Taste.</p>
+            <p style="color: #aebcb9;">The kitchen is preparing your meal.</p>
+            <div style="margin-top: 30px;">
+                <a href="../index.php" class="checkout-btn" style="background: #2e7d6f; color: #fff; text-decoration: none; display: block;">Back to Home</a>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <p>&copy; <?= date('Y') ?> Nordic Taste. All Rights Reserved.</p>
         <p class="fade-text">Osaka • Nature • Soul</p>
     </footer>
+
+    <script>
+        function openCheckoutModal() {
+            document.getElementById('modal-checkout').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function submitOrder() {
+            var name = document.getElementById('cust_name').value;
+            var table = document.getElementById('table_num').value;
+
+            if(name === "" || table === "") {
+                alert("Please fill in your Name and Table Number.");
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('name', name);
+            formData.append('table', table);
+
+            fetch('checkout_process.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    closeModal('modal-checkout');
+                    document.getElementById('modal-success').style.display = 'flex';
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('System error, please try again.');
+            });
+        }
+    </script>
 
 </body>
 </html>
