@@ -4,7 +4,9 @@ if (session_status() == PHP_SESSION_NONE) { session_start(); }
 
 $sessionID = session_id();
 
+// 获取座位和人数
 $userSeat = isset($_COOKIE['user_seat']) ? $_COOKIE['user_seat'] : 'Not Selected';
+$userPax = isset($_COOKIE['user_pax']) ? $_COOKIE['user_pax'] : '1';
 
 // --- 处理删除操作 ---
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
@@ -15,6 +17,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
     exit;
 }
 
+// --- 处理数量更新 ---
 if (isset($_GET['action']) && $_GET['action'] == 'update' && isset($_GET['id']) && isset($_GET['qty'])) {
     $cartItemID = intval($_GET['id']);
     $newQty = intval($_GET['qty']);
@@ -59,8 +62,8 @@ $grandTotal = $subtotal + $tax;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Cart - Nordic Taste</title>
-    <link rel="stylesheet" href="../css/cart.css">
     <link rel="shortcut icon" href="/image/logo.png">
+    <link rel="stylesheet" href="../css/cart.css">
 </head>
 <body>
 
@@ -80,12 +83,23 @@ $grandTotal = $subtotal + $tax;
                 <span>📦 Total Items:</span>
                 <strong><?= $totalQuantity ?></strong>
             </div>
+            
             <div style="width: 1px; background: rgba(255,255,255,0.2); height: 20px;"></div>
+            
             <div class="info-item">
                 <span>🪑 Seat:</span>
                 <strong style="color: #d4af37;"><?= htmlspecialchars($userSeat) ?></strong>
             </div>
+
+            <div style="width: 1px; background: rgba(255,255,255,0.2); height: 20px;"></div>
+
+            <div class="info-item">
+                <span>👥 Pax:</span>
+                <strong style="color: #d4af37;"><?= htmlspecialchars($userPax) ?></strong>
+            </div>
         </div>
+
+        <input type="hidden" id="pax_val" value="<?= htmlspecialchars($userPax) ?>">
 
         <?php if (count($cartItems) > 0): ?>
             <?php foreach ($cartItems as $item): ?>
@@ -170,6 +184,11 @@ $grandTotal = $subtotal + $tax;
                     <span style="color: #d4af37;">RM <?= number_format($grandTotal, 2) ?></span>
                 </div>
             </div>
+            
+            <div class="form-group">
+                <label>Number of Pax</label>
+                <input type="text" class="form-input" value="<?= htmlspecialchars($userPax) ?>" readonly style="background: rgba(255,255,255,0.1); color: #8faaa5; cursor: not-allowed;">
+            </div>
 
             <div class="form-group">
                 <label>Customer Name</label>
@@ -196,8 +215,16 @@ $grandTotal = $subtotal + $tax;
                     <img src="../image/tng.jpg" alt="TNG" class="ewallet-logo">
                 </div>
                 <div class="form-group">
-                    <label>Phone Number (Malaysia)</label>
-                    <input type="text" id="ewallet_phone" class="form-input" placeholder="012-3456789">
+                    <label>Phone Number</label>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="country_code" class="form-input" style="width: 80px; padding: 5px; text-align: center;">
+                            <option value="+60">🇲🇾 +60 (MY)</option>
+                            <option value="+1">🇺🇸 +1 (US)</option>
+                            <option value="+81">🇯🇵 +81 (JP)</option>
+                            <option value="+82">🇰🇷 +82 (KR)</option>
+                        </select>
+                        <input type="text" id="ewallet_phone" class="form-input" placeholder="Enter Phone No.">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>6-Digit PIN</label>
@@ -274,6 +301,5 @@ $grandTotal = $subtotal + $tax;
         <p class="fade-text">Osaka • Nature • Soul</p>
     </footer>
     <script src="../JS/cart.js"></script>
-
 </body>
 </html>

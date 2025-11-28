@@ -18,7 +18,9 @@ try {
     $cartTotalQty = 0;
 }
 
+// 🌟 修改：同时读取 Seat 和 Pax
 $currentSeat = isset($_COOKIE['user_seat']) ? $_COOKIE['user_seat'] : '';
+$currentPax = isset($_COOKIE['user_pax']) ? $_COOKIE['user_pax'] : ''; // 读取 Pax
 
 $type = isset($_GET['type']) ? $_GET['type'] : "unknown";
 $search_name = isset($_GET['search_name']) ? $_GET['search_name'] : "";
@@ -80,7 +82,7 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
             <a href="cart.php">
                 Cart (<span id="cart-qty-display"><?= $cartTotalQty ?></span>)
                 <span id="header-seat-display" style="color: #FFD700; font-weight: bold; margin-left: 5px;">
-                    <?= !empty($currentSeat) ? "[$currentSeat]" : "" ?>
+                    <?= !empty($currentSeat) ? "[$currentSeat]" . (!empty($currentPax) ? " 👥$currentPax" : "") : "" ?>
                 </span>
             </a>
         </div>
@@ -89,6 +91,16 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
     <div id="modal-dinein" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-title">Select Your Seat 🪑</div>
+            <p>Please choose a table and number of people.</p>
+        
+            <div style="margin-bottom: 15px; text-align: left;">
+                <label style="color: #aebcb9; font-size: 14px;">Number of People (Pax):</label>
+                <select id="pax-select" class="pax-select">
+                    <?php for($i=1; $i<=10; $i++): ?>
+                        <option value="<?= $i ?>"><?= $i ?> Pax</option>
+                    <?php endfor; ?>
+                </select>
+            </div>
             <p>Please choose a table to start ordering.</p>
             <div class="bus-layout">
                 <div class="seat" onclick="selectSeat('A1', this)">A1</div> <div class="seat" onclick="selectSeat('A2', this)">A2</div> <div class="aisle"></div>
@@ -251,26 +263,36 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
             }
         };
 
+        // 🌟🌟🌟 重点修改：增加了验证逻辑 🌟🌟🌟
         function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
             
-            // 🌟 关闭弹窗时，把座位存入 Cookie，这样刷新后 Header 依然有显示
             if(modalId === 'modal-dinein') {
-                setCookie("popup_shown", "true", 5);
-                if(selectedSeat !== "") {
-                    setCookie("user_seat", selectedSeat, 120); // 存2小时
-                    document.getElementById('header-seat-display').innerText = "[" + selectedSeat + "]";
+                // 🛑 拦截：如果没有选座位，不准关闭，也不准存 Cookie
+                if (selectedSeat === "") {
+                    alert("Please select a seat to continue!");
+                    return; // 直接停止函数，不执行后面的关闭代码
                 }
+
+                setCookie("popup_shown", "true", 5);
+                var pax = document.getElementById('pax-select').value;
+                setCookie("user_pax", pax, 120); 
+                setCookie("user_seat", selectedSeat, 120);
+                
+                document.getElementById('header-seat-display').innerText = "[" + selectedSeat + "] 👥" + pax;
+                
             } else if (modalId === 'modal-takeaway') {
                 setCookie("popup_shown", "true", 5);
                 setCookie("user_seat", "Takeaway", 120);
+                setCookie("user_pax", "1", 120);
                 document.getElementById('header-seat-display').innerText = "[Takeaway]";
             }
+
+            // 只有验证通过了，才关闭弹窗
+            document.getElementById(modalId).style.display = 'none';
         }
 
-        // 🌟 选座逻辑更新
         function selectSeat(seatNum, element) {
-            selectedSeat = seatNum; // 记录下来
+            selectedSeat = seatNum;
             document.getElementById('selected-seat-msg').innerText = "Selected Seat: " + seatNum;
             
             var allSeats = document.querySelectorAll('.seat');
@@ -312,7 +334,6 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
                     closeModal('modal-product-detail');
                     document.getElementById('modal-success').style.display = 'flex';
                     
-                    // 🌟 更新顶部 Header 的数量 (JS 实时更新)
                     var currentQty = parseInt(document.getElementById('cart-qty-display').innerText);
                     document.getElementById('cart-qty-display').innerText = currentQty + parseInt(quantity);
 

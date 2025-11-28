@@ -10,6 +10,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $customerName = isset($_POST['name']) ? trim($_POST['name']) : '';
     $tableNumber = isset($_POST['table']) ? trim($_POST['table']) : '';
     $paymentMethod = isset($_POST['method']) ? trim($_POST['method']) : '';
+    
+    // 🌟 1. 接收 Pax (如果没有传，默认是 1)
+    $pax = isset($_POST['pax']) ? intval($_POST['pax']) : 1; 
 
     if (empty($customerName) || empty($tableNumber) || empty($paymentMethod)) {
         echo json_encode(['status' => 'error', 'message' => 'Please fill in all required fields']);
@@ -55,8 +58,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo->beginTransaction();
         
-        $orderStmt = $pdo->prepare("INSERT INTO Orders (CustomerName, TableNumber, TotalAmount, PaymentMethod, Status) VALUES (?, ?, ?, ?, ?)");
-        $orderStmt->execute([$customerName, $tableNumber, $grandTotal, $paymentMethod, $orderStatus]);
+        // 🌟 2. 修改 INSERT 语句，加入 Pax
+        // 注意：这里的字段名 Pax 必须和你在数据库里加的一模一样
+        $orderStmt = $pdo->prepare("INSERT INTO Orders (CustomerName, TableNumber, Pax, TotalAmount, PaymentMethod, Status) VALUES (?, ?, ?, ?, ?, ?)");
+        
+        // 🌟 3. 在 execute 数组里加入 $pax
+        $orderStmt->execute([$customerName, $tableNumber, $pax, $grandTotal, $paymentMethod, $orderStatus]);
+        
         $orderID = $pdo->lastInsertId();
 
         $itemStmt = $pdo->prepare("INSERT INTO OrderItems (OrderID, ProductID, Quantity, Subtotal) VALUES (?, ?, ?, ?)");
