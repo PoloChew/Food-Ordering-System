@@ -11,9 +11,8 @@
             min-height: 100vh;
         }
 
-        /* --- 顶部导航栏 (Header) --- */
         header {
-            background-color: #0b2222; /* 比背景更深一点 */
+            background-color: #0b2222; 
             padding: 15px 40px;
             display: flex;
             justify-content: space-between;
@@ -22,10 +21,10 @@
         }
 
         .brand .logo {
-            height: 35px; /* 可以根据需求调整大小 */
+            height: 35px; 
             width: auto;
             vertical-align: middle;
-            margin-right: 10px; /* logo 和文字间距 */
+            margin-right: 10px; 
         }
 
         .brand {
@@ -169,6 +168,7 @@
             margin-top: 10px;
         }
 
+        
         /* 手机适配 */
         @media (max-width: 768px) {
             .scenery-gallery {

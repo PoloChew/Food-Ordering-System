@@ -93,6 +93,7 @@ switch ($currentMonth) {
             <img src="image/logo.png" alt="Logo" class="logo">
             <?php echo $seasonIcon; ?> My Restaurant
         </div>
+        <div id="google_translate_element" style="margin: 20px;"></div>
         <div class="nav-links">
             <a href="location.php">Location</a>
             <a href="Contact.php">Contact Us</a>
@@ -130,5 +131,20 @@ switch ($currentMonth) {
         <p>&copy; <?php echo date('Y'); ?> My Restaurant. All Rights Reserved.</p>
         <p class="fade-text">Osaka • Nature • Soul</p>
     </footer>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement(
+            {
+                pageLanguage: 'en',
+                includedLanguages: 'en,zh-CN,ja,ko', 
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            },
+            'google_translate_element'
+            );
+        }
+    </script>
+
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
 </body>
 </html>
