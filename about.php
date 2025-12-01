@@ -150,7 +150,7 @@ switch ($currentMonth) {
     </div>
 
     <footer>
-        <p>&copy; <?php echo date('Y'); ?> My Restaurant. All Rights Reserved.</p>
+        <p>&copy; <?php echo date('Y'); ?> Yume (梦 - ゆめ). All Rights Reserved.</p>
         <p class="fade-text">Osaka • Nature • Soul</p>
     </footer>
 </body>

@@ -69,14 +69,14 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu - Nordic Taste</title>
+    <title>Menu - Yume (梦 - ゆめ)</title>
     <link rel="shortcut icon" href="/image/logo.png">
     <link rel="stylesheet" href="../css/product.css"> 
 </head>
 <body>
 
     <header>
-        <div class="brand">🌿 Nordic Taste</div>
+        <div class="brand">Yume (梦 - ゆめ)</div>
         <div class="nav-links">
             <a href="clear_session.php" onclick="return confirm('Going home will clear your cart and seat selection. Continue?');">Home</a>
             <a href="cart.php">
@@ -229,7 +229,7 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
     <?php endif; ?>
 
     <footer>
-        <p>&copy; <?php echo date('Y'); ?> My Restaurant. All Rights Reserved.</p>
+        <p>&copy; <?php echo date('Y'); ?> Yume (梦 - ゆめ). All Rights Reserved.</p>
         <p class="fade-text">Osaka • Nature • Soul</p>
     </footer>
     
