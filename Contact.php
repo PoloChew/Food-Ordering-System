@@ -91,10 +91,10 @@ switch ($currentMonth) {
     <header>
         <div class="brand"><?php echo $seasonIcon; ?> My Restaurant</div>
         <div class="nav-links">
-            <a href="index.php">Home</a>
-            <a href="location.php">Location</a>
-            <a href="contact.php" style="color: #fff; border-bottom: 1px solid #fff;">Contact Us</a>
-            <a href="about.php">About</a>
+            <a href="index.php">🏠 Home</a>
+            <a href="location.php">📍 Location</a>
+            <a href="contact.php" style="color: #fff; border-bottom: 1px solid #fff;">📞 Contact Us</a>
+            <a href="about.php">👥 About</a>
         </div>
     </header>
 

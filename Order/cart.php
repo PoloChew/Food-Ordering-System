@@ -4,30 +4,57 @@ if (session_status() == PHP_SESSION_NONE) { session_start(); }
 
 $sessionID = session_id();
 
-// 获取座位和人数
+// Get Seat and Pax
 $userSeat = isset($_COOKIE['user_seat']) ? $_COOKIE['user_seat'] : 'Not Selected';
 $userPax = isset($_COOKIE['user_pax']) ? $_COOKIE['user_pax'] : '1';
 
-// --- 处理删除操作 ---
+// --- 🌟 FIXED: Safe Delete Action ---
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
     $cartItemID = intval($_GET['id']);
-    $delStmt = $pdo->prepare("DELETE FROM CartItems WHERE CartItemID = ?");
-    $delStmt->execute([$cartItemID]);
+
+    // 1. Double check this item actually belongs to the current user's cart (Security)
+    // This prevents accidental deletion if IDs get mixed up
+    $checkStmt = $pdo->prepare("
+        SELECT ci.CartItemID 
+        FROM CartItems ci
+        JOIN Cart c ON ci.CartID = c.CartID
+        WHERE ci.CartItemID = ? AND c.SessionID = ?
+    ");
+    $checkStmt->execute([$cartItemID, $sessionID]);
+
+    if ($checkStmt->fetch()) {
+        // 2. Delete STRICTLY by CartItemID and LIMIT 1 for safety
+        $delStmt = $pdo->prepare("DELETE FROM CartItems WHERE CartItemID = ? LIMIT 1");
+        $delStmt->execute([$cartItemID]);
+    }
+
     header("Location: cart.php");
     exit;
 }
 
-// --- 处理数量更新 ---
+// --- Handle Quantity Update ---
 if (isset($_GET['action']) && $_GET['action'] == 'update' && isset($_GET['id']) && isset($_GET['qty'])) {
     $cartItemID = intval($_GET['id']);
     $newQty = intval($_GET['qty']);
     
-    if ($newQty > 0) {
-        $updStmt = $pdo->prepare("UPDATE CartItems SET Quantity = ? WHERE CartItemID = ?");
-        $updStmt->execute([$newQty, $cartItemID]);
-    } else {
-        $delStmt = $pdo->prepare("DELETE FROM CartItems WHERE CartItemID = ?");
-        $delStmt->execute([$cartItemID]);
+    // Security check before update
+    $checkStmt = $pdo->prepare("
+        SELECT ci.CartItemID 
+        FROM CartItems ci
+        JOIN Cart c ON ci.CartID = c.CartID
+        WHERE ci.CartItemID = ? AND c.SessionID = ?
+    ");
+    $checkStmt->execute([$cartItemID, $sessionID]);
+
+    if ($checkStmt->fetch()) {
+        if ($newQty > 0) {
+            $updStmt = $pdo->prepare("UPDATE CartItems SET Quantity = ? WHERE CartItemID = ?");
+            $updStmt->execute([$newQty, $cartItemID]);
+        } else {
+            // Safe Delete if qty is 0
+            $delStmt = $pdo->prepare("DELETE FROM CartItems WHERE CartItemID = ? LIMIT 1");
+            $delStmt->execute([$cartItemID]);
+        }
     }
     header("Location: cart.php");
     exit;
@@ -64,14 +91,30 @@ $grandTotal = $subtotal + $tax;
     <title>My Cart - Nordic Taste</title>
     <link rel="shortcut icon" href="/image/logo.png">
     <link rel="stylesheet" href="../css/cart.css">
+    
+    <style>
+        /* Ensure badge and nav styling matches other pages */
+        .cart-badge {
+            position: absolute; top: -8px; right: -12px;
+            background-color: #ff4444; color: white; font-size: 10px; font-weight: bold;
+            padding: 2px 6px; border-radius: 50%; border: 1px solid #0b2222;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .nav-links a { position: relative; display: flex; align-items: center; gap: 5px; }
+    </style>
 </head>
 <body>
 
     <header>
         <div class="brand">Yume (梦 - ゆめ)</div>
         <div class="nav-links">
-            <a href="product.php">Back to Menu</a>
-            <a href="#" style="color: #fff; border-bottom: 1px solid #fff;">Cart</a>
+            <a href="product.php">⬅ Back to Menu</a>
+            <a href="#" style="color: #fff; border-bottom: 1px solid #fff;">
+                🛒 Cart
+                <?php if ($totalQuantity > 0): ?>
+                    <span class="cart-badge"><?= $totalQuantity ?></span>
+                <?php endif; ?>
+            </a>
         </div>
     </header>
 
@@ -152,7 +195,7 @@ $grandTotal = $subtotal + $tax;
 
     <div id="modal-checkout" class="modal-overlay">
         <div class="modal-box">
-            <button class="close-modal" onclick="closeModal('modal-checkout')">&times;</button>
+            <button class="close-modal" onclick="closeModal('modal-checkout')">×</button>
             <div class="modal-title">Checkout & Pay</div>
             
             <p style="text-align: left; color: #d4af37; font-size: 14px; margin-bottom: 5px;">Order Summary</p>

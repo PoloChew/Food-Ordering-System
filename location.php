@@ -89,10 +89,10 @@ switch ($currentMonth) {
     <header>
         <div class="brand"><?php echo $seasonIcon; ?>Yume (梦 - ゆめ)</div>
         <div class="nav-links">
-            <a href="index.php">Home</a>
-            <a href="location.php" style="color: #fff; border-bottom: 1px solid #fff;">Location</a> 
-            <a href="Contact.php">Contact Us</a>
-            <a href="about.php">About</a>
+            <a href="index.php">🏠 Home</a>
+            <a href="location.php" style="color: #fff; border-bottom: 1px solid #fff;">📍 Location</a> 
+            <a href="Contact.php">📞 Contact Us</a>
+            <a href="about.php">👥 About</a>
         </div>
     </header>
 
@@ -151,7 +151,7 @@ switch ($currentMonth) {
         </div>
     </div>
     <footer>
-        <p>&copy; <?php echo date('Y'); ?> Yume (梦 - ゆめ). All Rights Reserved.</p>
+        <p>© <?php echo date('Y'); ?> Yume (梦 - ゆめ). All Rights Reserved.</p>
         <p class="fade-text">Osaka • Nature • Soul</p>
     </footer>
 </body>
