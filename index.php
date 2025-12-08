@@ -79,15 +79,15 @@ switch ($currentMonth) {
         </div>
 
         <div class="scenery-gallery">
-            <a href="Order/product.php?category_id=1" class="scenery-card">
+            <a href="location.php" class="scenery-card">
                 <img src="https://images.unsplash.com/photo-1531366936337-7c912a4589a7?q=80&w=600" alt="Seafood">
                 <div class="scenery-label">🦀 Premium Seafood</div>
             </a>
-            <a href="Order/product.php?category_id=2" class="scenery-card">
+            <a href="location.php" class="scenery-card">
                 <img src="https://images.unsplash.com/photo-1473448912268-2022ce9509d8?q=80&w=400" alt="Japanese">
                 <div class="scenery-label">🍣 Fresh Japanese</div>
             </a>
-            <a href="Order/product.php?category_id=4" class="scenery-card">
+            <a href="location.php" class="scenery-card">
                 <img src="https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?q=80&w=600" alt="Beer">
                 <div class="scenery-label">🍺 Chilled Beers</div>
             </a>
