@@ -64,7 +64,7 @@ function submitOrder() {
 
         var isValidPhone = false;
         if(country === "+60") {
-            isValidPhone = /^01[0-9]-?[0-9]{7,8}$/.test(phoneRaw);
+            isValidPhone = /^1[0-9]-?[0-9]{7,8}$/.test(phoneRaw);
         } else if (country === "+1") {
             isValidPhone = /^\d{10}$/.test(phoneRaw);
         } else if (country === "+81") {
