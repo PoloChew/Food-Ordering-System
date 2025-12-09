@@ -337,7 +337,7 @@ $grandTotal = $subtotal + $tax;
             <div id="success-message-container"></div>
 
             <div style="margin-top: 30px;">
-                <a href="../index.php" class="checkout-btn" style="background: #2e7d6f; color: #fff; text-decoration: none; display: block;">Back to Home</a>
+                <a href="clear_session.php" class="checkout-btn" style="background: #2e7d6f; color: #fff; text-decoration: none; display: block;">Back to Home</a>
             </div>
         </div>
     </div>

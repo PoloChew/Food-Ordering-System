@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    try {
+try {
         $stmt = $pdo->prepare("
             SELECT ci.ProductID, ci.Quantity, p.Price 
             FROM CartItems ci
@@ -58,24 +58,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo->beginTransaction();
         
-        // 🌟 2. 修改 INSERT 语句，加入 Pax
-        // 注意：这里的字段名 Pax 必须和你在数据库里加的一模一样
+        // Insert Order
         $orderStmt = $pdo->prepare("INSERT INTO Orders (CustomerName, TableNumber, Pax, TotalAmount, PaymentMethod, Status) VALUES (?, ?, ?, ?, ?, ?)");
-        
-        // 🌟 3. 在 execute 数组里加入 $pax
         $orderStmt->execute([$customerName, $tableNumber, $pax, $grandTotal, $paymentMethod, $orderStatus]);
-        
         $orderID = $pdo->lastInsertId();
 
+        // Insert Order Items
         $itemStmt = $pdo->prepare("INSERT INTO OrderItems (OrderID, ProductID, Quantity, Subtotal) VALUES (?, ?, ?, ?)");
-        
         foreach ($cartItems as $item) {
             $itemSubtotal = $item['Price'] * $item['Quantity'];
             $itemStmt->execute([$orderID, $item['ProductID'], $item['Quantity'], $itemSubtotal]);
         }
 
-        $clearStmt = $pdo->prepare("DELETE FROM Cart WHERE SessionID = ?");
-        $clearStmt->execute([$sessionID]);
+        // 🌟 FIX: Explicitly Delete CartItems First 🌟
+        // 1. Get the CartID for this session
+        $getCartIdStmt = $pdo->prepare("SELECT CartID FROM Cart WHERE SessionID = ?");
+        $getCartIdStmt->execute([$sessionID]);
+        $cartRow = $getCartIdStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($cartRow) {
+            $currentCartID = $cartRow['CartID'];
+
+            // 2. Delete items inside the cart manually
+            $deleteItemsStmt = $pdo->prepare("DELETE FROM CartItems WHERE CartID = ?");
+            $deleteItemsStmt->execute([$currentCartID]);
+
+            // 3. Delete the Cart itself
+            $clearStmt = $pdo->prepare("DELETE FROM Cart WHERE CartID = ?");
+            $clearStmt->execute([$currentCartID]);
+        }
 
         $pdo->commit();
 
@@ -84,7 +95,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $response['payment_status'] = $orderStatus; 
 
     } catch (Exception $e) {
-        $pdo->rollBack();
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         $response['message'] = $e->getMessage();
     }
 }
