@@ -60,14 +60,22 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu - Yume (梦 - ゆめ)</title>
+    <title>Menu - TAR UMT Cafe</title>
     <link rel="shortcut icon" href="/image/logo.png">
-    <link rel="stylesheet" href="../css/product.css"> 
+    <link rel="stylesheet" href="../css/product.css">
+
+    <style>
+        .brand img { height: 35px; width: auto; margin-right: 10px; vertical-align: middle; }
+        .brand { display: flex; align-items: center; }
+    </style>
 </head>
 <body>
 
     <header>
-        <div class="brand">Yume (梦 - ゆめ)</div>
+        <div class="brand">
+            <img src="../image/logo.png" alt="TAR UMT">
+            TAR UMT Cafe
+        </div>
         <div class="nav-links">
             <a href="clear_session.php" onclick="return confirm('Going home will clear your cart and seat selection. Continue?');">🏠 Home</a>
             
@@ -213,8 +221,8 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
     <?php endif; ?>
 
     <footer>
-        <p>&copy; <?php echo date('Y'); ?> Yume (梦 - ゆめ). All Rights Reserved.</p>
-        <p class="fade-text">Osaka • Nature • Soul</p>
+        <p>&copy; <?php echo date('Y'); ?> TAR UMT Cafe. All Rights Reserved.</p>
+        <p class="fade-text">Beyond Education</p>
     </footer>
     
     <script>

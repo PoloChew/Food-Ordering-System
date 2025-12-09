@@ -88,7 +88,7 @@ $grandTotal = $subtotal + $tax;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Cart - Nordic Taste</title>
+    <title>My Cart - TAr UMT Cafe</title>
     <link rel="shortcut icon" href="/image/logo.png">
     <link rel="stylesheet" href="../css/cart.css">
     
@@ -106,7 +106,10 @@ $grandTotal = $subtotal + $tax;
 <body>
 
     <header>
-        <div class="brand">Yume (梦 - ゆめ)</div>
+        <div class="brand">
+            <img src="../image/logo.png" alt="TAR UMT">
+            TAR UMT Cafe
+        </div>
         <div class="nav-links">
             <a href="product.php">⬅ Back to Menu</a>
             <a href="#" style="color: #fff; border-bottom: 1px solid #fff;">
@@ -339,10 +342,7 @@ $grandTotal = $subtotal + $tax;
         </div>
     </div>
 
-    <footer>
-        <p>&copy; <?php echo date('Y'); ?> Yume (梦 - ゆめ). All Rights Reserved.</p>
-        <p class="fade-text">Osaka • Nature • Soul</p>
-    </footer>
+    <footer><p>&copy; <?php echo date('Y'); ?> TAR UMT Cafe. All Rights Reserved.</p><p class="fade-text">Beyond Education</p></footer>
     <script src="../JS/cart.js"></script>
 </body>
 </html>

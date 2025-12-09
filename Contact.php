@@ -81,15 +81,23 @@ switch ($currentMonth) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us - Nordic Taste</title>
+    <title>Contact Us - TAR UMT Cafe</title>
     <link rel="stylesheet" href="css/contact.css">
     <link rel="shortcut icon" href="/image/logo.png">
+
+    <style>
+        .brand img { height: 35px; width: auto; margin-right: 10px; vertical-align: middle; }
+        .brand { display: flex; align-items: center; }
+    </style>
 </head>
 
 <body>
 
     <header>
-        <div class="brand"><?php echo $seasonIcon; ?> My Restaurant</div>
+        <div class="brand">
+            <img src="image/logo.png" alt="TAR UMT">
+            TAR UMT Cafe
+        </div>
         <div class="nav-links">
             <a href="index.php">🏠 Home</a>
             <a href="location.php">📍 Location</a>
@@ -149,9 +157,6 @@ switch ($currentMonth) {
 
     </div>
 
-    <footer>
-        <p>&copy; <?php echo date('Y'); ?> Yume (梦 - ゆめ). All Rights Reserved.</p>
-        <p class="fade-text">Osaka • Nature • Soul</p>
-    </footer>
+    <footer><p>© <?php echo date('Y'); ?> TAR UMT Cafe. All Rights Reserved.</p><p class="fade-text">Beyond Education</p></footer>
 </body>
 </html>

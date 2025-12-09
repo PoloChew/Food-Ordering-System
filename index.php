@@ -31,7 +31,7 @@ switch ($currentMonth) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="/image/logo.png">
-    <title>Food Order System - <?php echo $greetingTitle; ?></title>
+    <title>TAR UMT Cafe - <?php echo $greetingTitle; ?></title>
     <link rel="stylesheet" href="css/index.css">
     
     <style>
@@ -48,8 +48,8 @@ switch ($currentMonth) {
 
     <header>
         <div class="brand">
-            <img src="image/logo.png" alt="Logo" class="logo">
-            <?php echo $seasonIcon; ?> Yume (梦 - ゆめ)
+            <img src="image/logo.png" alt="TAR UMT Logo" class="logo">
+            TAR UMT Cafe
         </div>
         
         <div class="nav-links">
@@ -101,8 +101,8 @@ switch ($currentMonth) {
     </div>
 
     <footer>
-        <p>&copy; <?php echo date('Y'); ?> Yume (梦 - ゆめ). All Rights Reserved.</p>
-        <p class="fade-text">Osaka • Nature • Soul</p>
+        <p>&copy; <?php echo date('Y'); ?> TAR UMT Cafe. All Rights Reserved.</p>
+        <p class="fade-text">Beyond Education</p>
     </footer>
 
     <script type="text/javascript">
