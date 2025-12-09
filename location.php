@@ -81,7 +81,7 @@ switch ($currentMonth) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/image/logo.png">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/751/751621.png">
     <title>Our Location - TAR UMT Cafe</title>
     <link rel="stylesheet" href="css/location.css">
 
@@ -117,11 +117,11 @@ switch ($currentMonth) {
             <div class="info-card">
                 <h2>Visit Us</h2>
                 <div class="info-item"><strong>📍 Address</strong>Ground Floor, Bangunan Tan Sri Khaw Kai Boh (Block A),<br>Jalan Genting Kelang, Setapak, 53300 Kuala Lumpur<br><span style="font-size:14px; color:#6c8c8c;">(Inside TAR UMT Main Campus)</span></div>
-                <div class="info-item"><strong>🕐 Opening Hours</strong>Mon - Sun: 24 Hours<br><span style="color: #d4af37;">★ Best Aurora Viewing: 10 PM - 2 AM</span></div>
+                <div class="info-item"><strong>🕐 Opening Hours</strong>Mon - Sun: 24 Hours</div>
                 <div class="info-item"><strong>📞 Contact</strong>+60 11 3772 1966<br>infoFoodUs@gmail.com</div>
                 <div style="margin-top: 40px;"><a href="#" class="btn" style="display: inline-block; padding: 15px 40px; background: #2e7d6f; color: #fff; text-decoration: none; border-radius: 30px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">Get Directions</a></div>
             </div>
-            <div class="map-container"><iframe src="https://maps.app.goo.gl/mbDxpcLTw9gqW3z69" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+            <div class="map-container"><iframe src="https://maps.google.com/maps?q=Tunku+Abdul+Rahman+University+of+Management+and+Technology+Setapak&t=&z=15&ie=UTF8&iwloc=&output=embed" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
         </div>
     </div>
     <footer><p>© <?php echo date('Y'); ?> TAR UMT Cafe. All Rights Reserved.</p><p class="fade-text">Beyond Education</p></footer>

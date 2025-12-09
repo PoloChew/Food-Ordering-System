@@ -83,7 +83,7 @@ switch ($currentMonth) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us - TAR UMT Cafe</title>
     <link rel="stylesheet" href="css/contact.css">
-    <link rel="shortcut icon" href="/image/logo.png">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/751/751621.png">
 
     <style>
         .brand img { height: 35px; width: auto; margin-right: 10px; vertical-align: middle; }

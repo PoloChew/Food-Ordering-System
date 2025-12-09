@@ -82,7 +82,7 @@ switch ($currentMonth) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us - The Creators</title>
-    <link rel="shortcut icon" href="/image/logo.png">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/751/751621.png">
     <link rel="stylesheet" href="css/about.css">
 
     <style>
