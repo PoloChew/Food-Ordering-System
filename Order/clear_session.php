@@ -5,7 +5,7 @@ if (session_status() == PHP_SESSION_NONE) { session_start(); }
 $sessionID = session_id();
 
 try {
-    $stmt = $pdo->prepare("DELETE FROM Cart WHERE SessionID = ?");
+    $stmt = $pdo->prepare("DELETE FROM cart WHERE SessionID = ?");
     $stmt->execute([$sessionID]);
 
 } catch (Exception $e) {

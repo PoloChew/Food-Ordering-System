@@ -6,7 +6,8 @@ if (session_status() == PHP_SESSION_NONE) { session_start(); }
 $sessionID = session_id();
 $cartTotalQty = 0;
 try {
-    $qtyStmt = $pdo->prepare("SELECT SUM(Quantity) FROM CartItems ci JOIN Cart c ON ci.CartID = c.CartID WHERE c.SessionID = ?");
+    // Changed CartItems to cartitems and Cart to cart
+    $qtyStmt = $pdo->prepare("SELECT SUM(Quantity) FROM cartitems ci JOIN cart c ON ci.CartID = c.CartID WHERE c.SessionID = ?");
     $qtyStmt->execute([$sessionID]);
     $cartTotalQty = $qtyStmt->fetchColumn();
     if (!$cartTotalQty) $cartTotalQty = 0;
@@ -32,13 +33,15 @@ if (!empty($category_id)) { $whereSQL .= " AND CategoryID = :cid"; $params[':cid
 if (!empty($min_price)) { $whereSQL .= " AND Price >= :min"; $params[':min'] = $min_price; }
 if (!empty($max_price)) { $whereSQL .= " AND Price <= :max"; $params[':max'] = $max_price; }
 
-$countSql = "SELECT COUNT(*) FROM Product $whereSQL";
+// Changed Product to product
+$countSql = "SELECT COUNT(*) FROM product $whereSQL";
 $countStmt = $pdo->prepare($countSql);
 $countStmt->execute($params);
 $totalRows = $countStmt->fetchColumn();
 $totalPages = ceil($totalRows / $limit);
 
-$sql = "SELECT * FROM Product $whereSQL LIMIT :limit OFFSET :offset";
+// Changed Product to product
+$sql = "SELECT * FROM product $whereSQL LIMIT :limit OFFSET :offset";
 $stmt = $pdo->prepare($sql);
 foreach ($params as $key => $val) { $stmt->bindValue($key, $val); }
 $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -46,11 +49,16 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$stmtHigh = $pdo->query("SELECT * FROM Product ORDER BY Price DESC LIMIT 1");
+// Changed Product to product
+$stmtHigh = $pdo->query("SELECT * FROM product ORDER BY Price DESC LIMIT 1");
 $mostExpensive = $stmtHigh->fetch(PDO::FETCH_ASSOC);
-$stmtSig = $pdo->query("SELECT * FROM Product ORDER BY RAND() LIMIT 1");
+
+// Changed Product to product
+$stmtSig = $pdo->query("SELECT * FROM product ORDER BY RAND() LIMIT 1");
 $signature = $stmtSig->fetch(PDO::FETCH_ASSOC);
-$stmtCat = $pdo->query("SELECT * FROM Category");
+
+// Changed Category to category
+$stmtCat = $pdo->query("SELECT * FROM category");
 $categories = $stmtCat->fetchAll(PDO::FETCH_ASSOC);
 function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; return '?' . http_build_query($params); }
 ?>
@@ -61,7 +69,7 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu - TAR UMT Cafe</title>
-    <<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/751/751621.png">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/751/751621.png">
     <link rel="stylesheet" href="../css/product.css">
 
     <style>
