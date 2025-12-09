@@ -129,3 +129,9 @@ select option { font-size: 16px; padding: 5px; background-color: #163f3f; color:
 footer { background: #081a1a; padding: 40px 20px; border-top: 1px solid #1f4f4f; text-align: center; color: #6c8c8c; margin-top: auto; }
 footer p { margin: 5px 0; font-size: 14px; letter-spacing: 1px; }
 footer .fade-text { font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; margin-top: 10px; }
+
+.site-logo {
+    width: 200px; /* Adjust width as needed */
+    height: auto; /* Keeps the aspect ratio correct */
+    max-width: 100%; /* Prevents it from overflowing on mobile */
+}

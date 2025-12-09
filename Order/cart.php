@@ -107,7 +107,7 @@ $grandTotal = $subtotal + $tax;
 
     <header>
         <div class="brand">
-            <img src="../image/logo.png" alt="TAR UMT">
+            <img src="../image/logo.png" alt="TAR UMT" class="site-logo">
             TAR UMT Cafe
         </div>
         <div class="nav-links">
