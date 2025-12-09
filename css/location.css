@@ -9,14 +9,12 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0f2f2f; ma
 header { background-color: #0b2222; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border-bottom: 1px solid #1f4f4f; }
 .brand { font-size: 20px; font-weight: 700; color: #d0f0d0; letter-spacing: 3px; text-transform: uppercase; }
 
-/* 🌟 FIX: Force horizontal alignment */
 .nav-links { 
     display: flex; 
     align-items: center; 
     gap: 20px; 
 }
 
-/* 🌟 Nav Links Style */
 .nav-links a { 
     color: #aebcb9; 
     text-decoration: none; 
@@ -38,14 +36,69 @@ header { background-color: #0b2222; padding: 15px 40px; display: flex; justify-c
 .hero-text p { font-size: 24px; color: #d0f0d0; margin-top: 15px; font-weight: 300; }
 
 .content-container { max-width: 1200px; margin: 0 auto; padding: 60px 40px; flex: 1; }
+
 .grid-layout { display: flex; gap: 50px; flex-wrap: wrap; }
+
 .info-card { flex: 1; min-width: 350px; background: rgba(22, 63, 63, 0.6); padding: 40px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
 .info-card h2 { font-size: 32px; color: #d0f0d0; margin-top: 0; border-bottom: 2px solid #2e7d6f; display: inline-block; padding-bottom: 10px; margin-bottom: 25px; }
 .info-item { margin-bottom: 30px; font-size: 18px; line-height: 1.6; color: #aebcb9; }
 .info-item strong { color: #fff; display: block; font-size: 20px; margin-bottom: 5px; }
 
-.map-container { flex: 1.5; min-width: 350px; height: 500px; border-radius: 15px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.5); border: 2px solid #2e7d6f; }
+/* 🌟 右侧列容器 (用来垂直排列地图和照片) */
+.right-column {
+    flex: 1.5;
+    min-width: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px; /* 地图和照片之间的间距 */
+}
+
+/* 地图样式调整 */
+.map-container { 
+    width: 100%; 
+    height: 400px; /* 固定高度 */
+    border-radius: 15px; 
+    overflow: hidden; 
+    box-shadow: 0 15px 40px rgba(0,0,0,0.5); 
+    border: 2px solid #2e7d6f; 
+}
 .map-container iframe { width: 100%; height: 100%; border: 0; filter: brightness(0.95); }
+
+/* 🌟 新增：Arena 照片样式 */
+.arena-container {
+    width: 100%;
+    height: 300px; /* 照片高度 */
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.arena-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.arena-container:hover img {
+    transform: scale(1.05); /* 鼠标放上去有放大效果 */
+}
+
+/* 照片上的文字说明 */
+.arena-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    color: #d4af37;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-align: center;
+}
 
 footer { background-color: #081a1a; padding: 40px 20px; border-top: 1px solid #1f4f4f; text-align: center; color: #6c8c8c; }
 footer p { margin: 5px 0; font-size: 14px; letter-spacing: 1px; }
@@ -58,4 +111,5 @@ footer .fade-text { font-size: 12px; opacity: 0.5; text-transform: uppercase; le
     .hero-text h1 { font-size: 36px; }
     .grid-layout { flex-direction: column; }
     .map-container { height: 300px; }
+    .arena-container { height: 250px; }
 }

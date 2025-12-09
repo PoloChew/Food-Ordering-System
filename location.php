@@ -28,7 +28,7 @@ switch ($currentMonth) {
         $subTitle = "Egg-citing treats await you";
         $seasonIcon = "🥚";
         break;
-    case 5: 
+    case 5: // 五月 - 母亲节
         $greetingTitle = "Celebrate Mom";
         $subTitle = "Treat the special lady in your life";
         $seasonIcon = "💐";
@@ -121,7 +121,23 @@ switch ($currentMonth) {
                 <div class="info-item"><strong>📞 Contact</strong>+60 11 3772 1966<br>infoFoodUs@gmail.com</div>
                 <div style="margin-top: 40px;"><a href="#" class="btn" style="display: inline-block; padding: 15px 40px; background: #2e7d6f; color: #fff; text-decoration: none; border-radius: 30px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">Get Directions</a></div>
             </div>
-            <div class="map-container"><iframe src="https://maps.google.com/maps?q=Tunku+Abdul+Rahman+University+of+Management+and+Technology+Setapak&t=&z=15&ie=UTF8&iwloc=&output=embed" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+            
+            <div class="right-column">
+                
+                <div class="map-container">
+                    
+
+[Image of google map iframe]
+
+                    <iframe src="https://www.google.com/maps/embed?pb=!4v1765257965801!6m8!1m7!1smeDqMgcKtU8ZYMDJDuf-vg!2m2!1d3.217365224687878!2d101.7284337870789!3f259.240128064341!4f-3.2837938933896!5f0.7820865974627469" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+
+                <div class="arena-container">
+                    <img src="image/arena.jpg" alt="Arena Scene" onerror="this.src='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1000&auto=format&fit=crop'">
+                    <div class="arena-caption">The Grand Arena View</div>
+                </div>
+
+            </div>
         </div>
     </div>
     <footer><p>© <?php echo date('Y'); ?> TAR UMT Cafe. All Rights Reserved.</p><p class="fade-text">Beyond Education</p></footer>
