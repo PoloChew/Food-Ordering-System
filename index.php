@@ -159,19 +159,19 @@ switch ($currentMonth) {
        <div class="scenery-gallery">
             <a href="javascript:void(0)" class="scenery-card" 
                onclick="showIntro('Seafood', '🦀 Premium Seafood', 'Dive into the ocean\'s finest offerings. Our fresh seafood selection features giant King Crabs, succulent Tiger Prawns, and imported Oysters, all prepared to highlight their natural sweetness.', 1)">
-                <img src="https://images.unsplash.com/photo-1531366936337-7c912a4589a7?q=80&w=600" alt="Seafood">
+                <img src="../image/seafood.png" alt="Seafood">
                 <div class="scenery-label">🦀 Premium Seafood</div>
             </a>
 
             <a href="javascript:void(0)" class="scenery-card" 
                onclick="showIntro('Japanese', '🍣 Fresh Japanese', 'Experience the art of Japanese cuisine. From delicate Salmon Sashimi to rich Beef Ramen and crispy Tempura, every dish is crafted with precision and tradition in mind.', 2)">
-                <img src="https://images.unsplash.com/photo-1473448912268-2022ce9509d8?q=80&w=400" alt="Japanese">
+                <img src="../image/japanese_food.png" alt="Japanese">
                 <div class="scenery-label">🍣 Fresh Japanese</div>
             </a>
 
             <a href="javascript:void(0)" class="scenery-card" 
                onclick="showIntro('Beer', '🍺 Chilled Beers', 'Relax with our curated selection of premium Japanese beers. Whether you prefer the crisp taste of Asahi or the rich aroma of Suntory Premium Malts, we have the perfect brew for you.', 4)">
-                <img src="https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?q=80&w=600" alt="Beer">
+                <img src="../image/beer.png" alt="Beer">
                 <div class="scenery-label">🍺 Chilled Beers</div>
             </a>
         </div>
