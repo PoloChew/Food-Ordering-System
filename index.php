@@ -41,6 +41,84 @@ switch ($currentMonth) {
         .snow { background: white; border-radius: 50%; box-shadow: 0 0 5px white; animation: fall linear infinite; }
         @keyframes fall { 0% { top: -10%; opacity: 0.9; } 100% { top: 110%; opacity: 0.2; } }
         @keyframes rotate { 0% { transform: translateX(0) rotate(0deg); } 50% { transform: translateX(50px) rotate(180deg); } 100% { transform: translateX(0) rotate(360deg); } }
+
+        .intro-modal {
+            display: none; 
+            position: fixed; 
+            z-index: 10000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.85); 
+            justify-content: center; 
+            align-items: center;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s;
+        }
+
+        .intro-content {
+            background: linear-gradient(145deg, #163f3f, #0f2f2f);
+            padding: 40px; 
+            border-radius: 20px; 
+            border: 2px solid #d4af37; 
+            width: 90%; 
+            max-width: 500px; 
+            text-align: center; 
+            position: relative;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+            color: #fff;
+        }
+
+        .intro-title {
+            color: #d4af37; 
+            font-size: 32px; 
+            margin-bottom: 20px; 
+            font-weight: bold; 
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .intro-text {
+            font-size: 16px; 
+            line-height: 1.8; 
+            color: #aebcb9; 
+            margin-bottom: 30px;
+        }
+
+        .intro-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .intro-btn {
+            padding: 12px 25px; 
+            border-radius: 30px; 
+            text-decoration: none; 
+            font-weight: bold; 
+            transition: 0.3s;
+            flex: 1;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .btn-dine { background: #2e7d6f; color: #fff; border: 1px solid #2e7d6f; }
+        .btn-dine:hover { background: #3fa58d; transform: translateY(-2px); }
+
+        .btn-take { background: transparent; color: #d4af37; border: 1px solid #d4af37; }
+        .btn-take:hover { background: #d4af37; color: #000; transform: translateY(-2px); }
+
+        .close-intro {
+            position: absolute; 
+            top: 15px; 
+            right: 20px; 
+            color: #6c8c8c; 
+            font-size: 28px; 
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .close-intro:hover { color: #fff; transform: rotate(90deg); }
     </style>
 </head>
 
@@ -78,16 +156,21 @@ switch ($currentMonth) {
             <p><?php echo $subTitle; ?></p>
         </div>
 
-        <div class="scenery-gallery">
-            <a href="location.php" class="scenery-card">
+       <div class="scenery-gallery">
+            <a href="javascript:void(0)" class="scenery-card" 
+               onclick="showIntro('Seafood', '🦀 Premium Seafood', 'Dive into the ocean\'s finest offerings. Our fresh seafood selection features giant King Crabs, succulent Tiger Prawns, and imported Oysters, all prepared to highlight their natural sweetness.', 1)">
                 <img src="https://images.unsplash.com/photo-1531366936337-7c912a4589a7?q=80&w=600" alt="Seafood">
                 <div class="scenery-label">🦀 Premium Seafood</div>
             </a>
-            <a href="location.php" class="scenery-card">
+
+            <a href="javascript:void(0)" class="scenery-card" 
+               onclick="showIntro('Japanese', '🍣 Fresh Japanese', 'Experience the art of Japanese cuisine. From delicate Salmon Sashimi to rich Beef Ramen and crispy Tempura, every dish is crafted with precision and tradition in mind.', 2)">
                 <img src="https://images.unsplash.com/photo-1473448912268-2022ce9509d8?q=80&w=400" alt="Japanese">
                 <div class="scenery-label">🍣 Fresh Japanese</div>
             </a>
-            <a href="location.php" class="scenery-card">
+
+            <a href="javascript:void(0)" class="scenery-card" 
+               onclick="showIntro('Beer', '🍺 Chilled Beers', 'Relax with our curated selection of premium Japanese beers. Whether you prefer the crisp taste of Asahi or the rich aroma of Suntory Premium Malts, we have the perfect brew for you.', 4)">
                 <img src="https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?q=80&w=600" alt="Beer">
                 <div class="scenery-label">🍺 Chilled Beers</div>
             </a>
@@ -150,6 +233,44 @@ switch ($currentMonth) {
             setTimeout(() => { particle.remove(); }, duration * 1000); 
         }
         setInterval(createParticle, (particleType === 'snow') ? 200 : 400);
+
+        function showIntro(category, title, description, categoryId) {
+            document.getElementById('introModal').style.display = 'flex';
+            document.getElementById('introTitle').innerText = title;
+            document.getElementById('introText').innerText = description;
+            
+            // Set links to go directly to that category on the menu
+            document.getElementById('linkDine').href = "Order/product.php?type=dinein&category_id=" + categoryId;
+            document.getElementById('linkTake').href = "Order/product.php?type=takeaway&category_id=" + categoryId;
+        }
+
+        function closeIntro() {
+            document.getElementById('introModal').style.display = 'none';
+        }
+
+        // Close modal if clicking outside the box
+        window.onclick = function(event) {
+            var modal = document.getElementById('introModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
     </script>
+
+    <div id="introModal" class="intro-modal">
+        <div class="intro-content">
+            <span class="close-intro" onclick="closeIntro()">×</span>
+            <div id="introTitle" class="intro-title"></div>
+            <p id="introText" class="intro-text"></p>
+            
+            <p style="font-size: 14px; color: #fff; margin-bottom: 15px;">— How would you like to order? —</p>
+            
+            <div class="intro-buttons">
+                <a id="linkDine" href="#" class="intro-btn btn-dine">🍽️ Dine In</a>
+                <a id="linkTake" href="#" class="intro-btn btn-take">🛍️ Take Away</a>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
