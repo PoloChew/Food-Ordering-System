@@ -68,7 +68,7 @@ $stmt = $pdo->prepare("
     SELECT ci.CartItemID, ci.Quantity, p.Name, p.Price, p.ImageURL 
     FROM cartitems ci
     JOIN cart c ON ci.CartID = c.CartID
-    JOIN Product p ON ci.ProductID = p.ProductID
+    JOIN product p ON ci.ProductID = p.ProductID
     WHERE c.SessionID = ?
 ");
 $stmt->execute([$sessionID]);
