@@ -36,21 +36,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 try {
         $stmt = $pdo->prepare("
             SELECT ci.ProductID, ci.Quantity, p.Price 
-            FROM CartItems ci
-            JOIN Cart c ON ci.CartID = c.CartID
-            JOIN Product p ON ci.ProductID = p.ProductID
+            FROM cartitems ci
+            JOIN cart c ON ci.CartID = c.CartID
+            JOIN product p ON ci.ProductID = p.ProductID
             WHERE c.SessionID = ?
         ");
         $stmt->execute([$sessionID]);
-        $cartItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $cartitems = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if (empty($cartItems)) {
+        if (empty($cartitems)) {
             echo json_encode(['status' => 'error', 'message' => 'Cart is empty']);
             exit;
         }
 
         $subtotal = 0;
-        foreach ($cartItems as $item) {
+        foreach ($cartitems as $item) {
             $subtotal += $item['Price'] * $item['Quantity'];
         }
         $tax = $subtotal * 0.06;
@@ -59,20 +59,20 @@ try {
         $pdo->beginTransaction();
         
         // Insert Order
-        $orderStmt = $pdo->prepare("INSERT INTO Orders (CustomerName, TableNumber, Pax, TotalAmount, PaymentMethod, Status) VALUES (?, ?, ?, ?, ?, ?)");
+        $orderStmt = $pdo->prepare("INSERT INTO orders (CustomerName, TableNumber, Pax, TotalAmount, PaymentMethod, Status) VALUES (?, ?, ?, ?, ?, ?)");
         $orderStmt->execute([$customerName, $tableNumber, $pax, $grandTotal, $paymentMethod, $orderStatus]);
         $orderID = $pdo->lastInsertId();
 
         // Insert Order Items
-        $itemStmt = $pdo->prepare("INSERT INTO OrderItems (OrderID, ProductID, Quantity, Subtotal) VALUES (?, ?, ?, ?)");
-        foreach ($cartItems as $item) {
+        $itemStmt = $pdo->prepare("INSERT INTO orderItems (OrderID, ProductID, Quantity, Subtotal) VALUES (?, ?, ?, ?)");
+        foreach ($cartitems as $item) {
             $itemSubtotal = $item['Price'] * $item['Quantity'];
             $itemStmt->execute([$orderID, $item['ProductID'], $item['Quantity'], $itemSubtotal]);
         }
 
         // 🌟 FIX: Explicitly Delete CartItems First 🌟
         // 1. Get the CartID for this session
-        $getCartIdStmt = $pdo->prepare("SELECT CartID FROM Cart WHERE SessionID = ?");
+        $getCartIdStmt = $pdo->prepare("SELECT CartID FROM cart WHERE SessionID = ?");
         $getCartIdStmt->execute([$sessionID]);
         $cartRow = $getCartIdStmt->fetch(PDO::FETCH_ASSOC);
 
@@ -80,11 +80,11 @@ try {
             $currentCartID = $cartRow['CartID'];
 
             // 2. Delete items inside the cart manually
-            $deleteItemsStmt = $pdo->prepare("DELETE FROM CartItems WHERE CartID = ?");
+            $deleteItemsStmt = $pdo->prepare("DELETE FROM cartItems WHERE CartID = ?");
             $deleteItemsStmt->execute([$currentCartID]);
 
             // 3. Delete the Cart itself
-            $clearStmt = $pdo->prepare("DELETE FROM Cart WHERE CartID = ?");
+            $clearStmt = $pdo->prepare("DELETE FROM cart WHERE CartID = ?");
             $clearStmt->execute([$currentCartID]);
         }
 

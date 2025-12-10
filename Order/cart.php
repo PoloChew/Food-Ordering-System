@@ -16,15 +16,15 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
     // This prevents accidental deletion if IDs get mixed up
     $checkStmt = $pdo->prepare("
         SELECT ci.CartItemID 
-        FROM CartItems ci
-        JOIN Cart c ON ci.CartID = c.CartID
+        FROM cartitems ci
+        JOIN cart c ON ci.CartID = c.CartID
         WHERE ci.CartItemID = ? AND c.SessionID = ?
     ");
     $checkStmt->execute([$cartItemID, $sessionID]);
 
     if ($checkStmt->fetch()) {
         // 2. Delete STRICTLY by CartItemID and LIMIT 1 for safety
-        $delStmt = $pdo->prepare("DELETE FROM CartItems WHERE CartItemID = ? LIMIT 1");
+        $delStmt = $pdo->prepare("DELETE FROM cartitems WHERE CartItemID = ? LIMIT 1");
         $delStmt->execute([$cartItemID]);
     }
 
@@ -40,19 +40,19 @@ if (isset($_GET['action']) && $_GET['action'] == 'update' && isset($_GET['id']) 
     // Security check before update
     $checkStmt = $pdo->prepare("
         SELECT ci.CartItemID 
-        FROM CartItems ci
-        JOIN Cart c ON ci.CartID = c.CartID
+        FROM cartitems ci
+        JOIN cart c ON ci.CartID = c.CartID
         WHERE ci.CartItemID = ? AND c.SessionID = ?
     ");
     $checkStmt->execute([$cartItemID, $sessionID]);
 
     if ($checkStmt->fetch()) {
         if ($newQty > 0) {
-            $updStmt = $pdo->prepare("UPDATE CartItems SET Quantity = ? WHERE CartItemID = ?");
+            $updStmt = $pdo->prepare("UPDATE cartitems SET Quantity = ? WHERE CartItemID = ?");
             $updStmt->execute([$newQty, $cartItemID]);
         } else {
             // Safe Delete if qty is 0
-            $delStmt = $pdo->prepare("DELETE FROM CartItems WHERE CartItemID = ? LIMIT 1");
+            $delStmt = $pdo->prepare("DELETE FROM cartitems WHERE CartItemID = ? LIMIT 1");
             $delStmt->execute([$cartItemID]);
         }
     }
@@ -60,21 +60,21 @@ if (isset($_GET['action']) && $_GET['action'] == 'update' && isset($_GET['id']) 
     exit;
 }
 
-$cartItems = [];
+$cartitems = [];
 $subtotal = 0;
 $totalQuantity = 0;
 
 $stmt = $pdo->prepare("
     SELECT ci.CartItemID, ci.Quantity, p.Name, p.Price, p.ImageURL 
-    FROM CartItems ci
-    JOIN Cart c ON ci.CartID = c.CartID
+    FROM cartitems ci
+    JOIN cart c ON ci.CartID = c.CartID
     JOIN Product p ON ci.ProductID = p.ProductID
     WHERE c.SessionID = ?
 ");
 $stmt->execute([$sessionID]);
-$cartItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$cartitems = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-foreach ($cartItems as $item) {
+foreach ($cartitems as $item) {
     $subtotal += $item['Price'] * $item['Quantity'];
     $totalQuantity += $item['Quantity'];
 }
@@ -88,7 +88,7 @@ $grandTotal = $subtotal + $tax;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Cart - TAr UMT Cafe</title>
+    <title>My cart - TAr UMT Cafe</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/751/751621.png">
     <link rel="stylesheet" href="../css/cart.css">
     
@@ -113,7 +113,7 @@ $grandTotal = $subtotal + $tax;
         <div class="nav-links">
             <a href="product.php">⬅ Back to Menu</a>
             <a href="#" style="color: #fff; border-bottom: 1px solid #fff;">
-                🛒 Cart
+                🛒 cart
                 <?php if ($totalQuantity > 0): ?>
                     <span class="cart-badge"><?= $totalQuantity ?></span>
                 <?php endif; ?>
@@ -147,8 +147,8 @@ $grandTotal = $subtotal + $tax;
 
         <input type="hidden" id="pax_val" value="<?= htmlspecialchars($userPax) ?>">
 
-        <?php if (count($cartItems) > 0): ?>
-            <?php foreach ($cartItems as $item): ?>
+        <?php if (count($cartitems) > 0): ?>
+            <?php foreach ($cartitems as $item): ?>
                 <div class="cart-item">
                     <img src="../image/<?= $item['ImageURL'] ?>" onerror="this.src='https://via.placeholder.com/100'" class="item-img">
                     <div class="item-details">
@@ -204,7 +204,7 @@ $grandTotal = $subtotal + $tax;
             <p style="text-align: left; color: #d4af37; font-size: 14px; margin-bottom: 5px;">Order Summary</p>
             
             <div class="modal-summary-list">
-                <?php foreach ($cartItems as $item): ?>
+                <?php foreach ($cartitems as $item): ?>
                     <div class="modal-item">
                         <img src="../image/<?= $item['ImageURL'] ?>" onerror="this.src='https://via.placeholder.com/50'" class="modal-img">
                         <div class="modal-info">

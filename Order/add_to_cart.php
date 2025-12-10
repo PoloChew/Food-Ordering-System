@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($productID > 0 && $quantity > 0) {
         try {
             
-            $stmt = $pdo->prepare("SELECT CartID FROM Cart WHERE SessionID = ?");
+            $stmt = $pdo->prepare("SELECT CartID FROM cart WHERE SessionID = ?");
             $stmt->execute([$sessionID]);
             $cart = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -25,23 +25,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $cartID = $cart['CartID'];
             } else {
                 
-                $stmt = $pdo->prepare("INSERT INTO Cart (SessionID) VALUES (?)");
+                $stmt = $pdo->prepare("INSERT INTO cart (SessionID) VALUES (?)");
                 $stmt->execute([$sessionID]);
                 $cartID = $pdo->lastInsertId();
             }
 
-            $stmt = $pdo->prepare("SELECT CartItemID, Quantity FROM CartItems WHERE CartID = ? AND ProductID = ?");
+            $stmt = $pdo->prepare("SELECT CartItemID, Quantity FROM cartitems WHERE CartID = ? AND ProductID = ?");
             $stmt->execute([$cartID, $productID]);
             $existingItem = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($existingItem) {
                 
                 $newQuantity = $existingItem['Quantity'] + $quantity;
-                $updateStmt = $pdo->prepare("UPDATE CartItems SET Quantity = ? WHERE CartItemID = ?");
+                $updateStmt = $pdo->prepare("UPDATE cartItems SET Quantity = ? WHERE CartItemID = ?");
                 $updateStmt->execute([$newQuantity, $existingItem['CartItemID']]);
             } else {
                 
-                $insertStmt = $pdo->prepare("INSERT INTO CartItems (CartID, ProductID, Quantity) VALUES (?, ?, ?)");
+                $insertStmt = $pdo->prepare("INSERT INTO cartitems (CartID, ProductID, Quantity) VALUES (?, ?, ?)");
                 $insertStmt->execute([$cartID, $productID, $quantity]);
             }
 
