@@ -63,8 +63,8 @@ try {
         $orderStmt->execute([$customerName, $tableNumber, $pax, $grandTotal, $paymentMethod, $orderStatus]);
         $orderID = $pdo->lastInsertId();
 
-        // Insert Order Items
-        $itemStmt = $pdo->prepare("INSERT INTO orderItems (OrderID, ProductID, Quantity, Subtotal) VALUES (?, ?, ?, ?)");
+        // Insert Order Items - Changed orderItems to orderitems
+        $itemStmt = $pdo->prepare("INSERT INTO orderitems (OrderID, ProductID, Quantity, Subtotal) VALUES (?, ?, ?, ?)");
         foreach ($cartitems as $item) {
             $itemSubtotal = $item['Price'] * $item['Quantity'];
             $itemStmt->execute([$orderID, $item['ProductID'], $item['Quantity'], $itemSubtotal]);
@@ -79,8 +79,8 @@ try {
         if ($cartRow) {
             $currentCartID = $cartRow['CartID'];
 
-            // 2. Delete items inside the cart manually
-            $deleteItemsStmt = $pdo->prepare("DELETE FROM cartItems WHERE CartID = ?");
+            // 2. Delete items inside the cart manually - Changed cartItems to cartitems
+            $deleteItemsStmt = $pdo->prepare("DELETE FROM cartitems WHERE CartID = ?");
             $deleteItemsStmt->execute([$currentCartID]);
 
             // 3. Delete the Cart itself
