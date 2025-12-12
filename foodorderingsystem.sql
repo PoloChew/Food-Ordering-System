@@ -37,11 +37,6 @@ CREATE TABLE `cart` (
 -- Dumping data for table `cart`
 --
 
-INSERT INTO `cart` (`CartID`, `SessionID`, `CreatedAt`) VALUES
-(1, 'dc3vfsdbmbfth051lpjbdh3vk8', '2025-11-25 14:54:41'),
-(2, 'crbf88mg6jt9hfjagnl4gjvt75', '2025-11-25 16:13:00'),
-(22, '04b79n4o2duqgeidt9fe894f7n', '2025-11-26 13:29:28');
-
 -- --------------------------------------------------------
 
 --
@@ -55,18 +50,6 @@ CREATE TABLE `cartitems` (
   `Quantity` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `cartitems`
---
-
-INSERT INTO `cartitems` (`CartItemID`, `CartID`, `ProductID`, `Quantity`) VALUES
-(7, 1, 2, 1),
-(8, 2, 4, 1),
-(9, 2, 8, 1),
-(10, 2, 14, 1),
-(11, 2, 20, 1),
-(12, 2, 23, 1),
-(80, 22, 34, 1);
 
 -- --------------------------------------------------------
 
@@ -104,62 +87,6 @@ CREATE TABLE `orderitems` (
   `Subtotal` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `orderitems`
---
-
-INSERT INTO `orderitems` (`OrderItemID`, `OrderID`, `ProductID`, `Quantity`, `Subtotal`) VALUES
-(1, 1, 5, 2, 35.00),
-(2, 1, 13, 1, 21.90),
-(3, 2, 3, 3, 50.70),
-(4, 2, 4, 1, 14.90),
-(5, 3, 1, 2, 31.80),
-(6, 3, 16, 3, 50.70),
-(7, 3, 27, 1, 558.00),
-(8, 3, 32, 3, 294.00),
-(9, 4, 2, 1, 13.50),
-(10, 5, 2, 1, 13.50),
-(11, 5, 7, 2, 25.80),
-(12, 5, 19, 1, 12.50),
-(13, 5, 20, 1, 4.90),
-(14, 5, 23, 1, 188.00),
-(15, 6, 3, 1, 16.90),
-(16, 6, 8, 1, 16.50),
-(17, 6, 9, 1, 10.90),
-(18, 7, 17, 1, 32.90),
-(19, 7, 16, 1, 16.90),
-(20, 7, 13, 1, 21.90),
-(21, 8, 4, 12, 178.80),
-(22, 8, 2, 7, 94.50),
-(23, 8, 7, 4, 51.60),
-(24, 9, 21, 1, 198.00),
-(25, 9, 30, 2, 256.00),
-(26, 9, 41, 2, 49.00),
-(27, 10, 22, 1, 1268.00),
-(28, 10, 28, 1, 88.00),
-(29, 10, 3, 1, 16.90),
-(30, 11, 3, 2, 33.80),
-(31, 11, 4, 1, 14.90),
-(32, 11, 14, 1, 19.90),
-(33, 11, 13, 1, 21.90),
-(34, 12, 3, 1, 16.90),
-(35, 12, 4, 1, 14.90),
-(36, 12, 2, 1, 13.50),
-(37, 12, 1, 1, 15.90),
-(38, 13, 1, 6, 95.40),
-(39, 13, 10, 1, 13.90),
-(40, 13, 28, 4, 352.00),
-(41, 13, 27, 3, 1674.00),
-(42, 14, 4, 1, 14.90),
-(43, 15, 4, 1, 14.90),
-(44, 16, 4, 1, 14.90),
-(45, 16, 3, 1, 16.90),
-(46, 17, 4, 2, 29.80),
-(47, 18, 2, 2, 27.00),
-(48, 18, 14, 1, 19.90),
-(49, 18, 13, 1, 21.90),
-(50, 18, 17, 1, 32.90),
-(51, 18, 11, 1, 18.90);
 
 -- --------------------------------------------------------
 
@@ -178,29 +105,6 @@ CREATE TABLE `orders` (
   `Status` varchar(50) DEFAULT 'Pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `orders`
---
-
-INSERT INTO `orders` (`OrderID`, `OrderDate`, `TotalAmount`, `CustomerName`, `TableNumber`, `Pax`, `PaymentMethod`, `Status`) VALUES
-(1, '2025-11-26 01:59:29', 60.31, 'NG HONG LIANG', 'A1', 1, '', 'Pending'),
-(2, '2025-11-26 02:02:53', 69.54, 'NG HONG LIANG', 'A1', 1, '', 'Pending'),
-(3, '2025-11-26 02:10:52', 990.57, 'Wong Jia Cheng', 'B2', 1, '', 'Pending'),
-(4, '2025-11-26 04:44:30', 14.31, 'hgfdrth', 'A1', 1, '', 'Pending'),
-(5, '2025-11-26 05:01:54', 259.38, 'NG HONG LIANG', 'A1', 1, '', 'Pending'),
-(6, '2025-11-26 05:03:42', 46.96, 'NG HONG LIANG', 'A1', 1, '', 'Pending'),
-(7, '2025-11-26 05:41:28', 76.00, 'NG HONG LIANG', 'B4', 1, 'E-wallet', 'Successfully'),
-(8, '2025-11-26 05:42:28', 344.39, 'NG HONG LIANG', 'B1', 1, 'Online Banking', 'Successfully'),
-(9, '2025-11-26 06:07:49', 533.18, 'NG HONG LIANG', 'B3', 1, 'Online Banking', 'Successfully'),
-(10, '2025-11-26 13:08:13', 1455.27, 'NG HONG LIANG', 'B4', 1, 'Cash', 'Pending'),
-(11, '2025-11-26 13:23:58', 95.93, 'NG HONG LIANG', 'B1', 1, 'Online Banking', 'Successfully'),
-(12, '2025-11-28 01:55:21', 64.87, 'NG HONG LIANG', 'B1', 5, 'E-wallet', 'Successfully'),
-(13, '2025-11-28 02:06:10', 2263.42, 'NG HONG LIANG', 'B3', 10, 'Online Banking', 'Successfully'),
-(14, '2025-11-28 02:17:26', 15.79, 'NG HONG LIANG', 'A2', 1, 'Online Banking', 'Successfully'),
-(15, '2025-11-28 02:22:35', 15.79, 'NG HONG LIANG', 'A4', 8, 'Online Banking', 'Successfully'),
-(16, '2025-11-28 02:23:52', 33.71, 'NG HONG LIANG', 'B3', 1, 'E-wallet', 'Successfully'),
-(17, '2025-11-28 02:26:01', 31.59, 'HL', 'A2', 1, 'E-wallet', 'Successfully'),
-(18, '2025-11-28 02:30:23', 127.84, 'NG HONG LIANG', 'A2', 1, 'Online Banking', 'Successfully');
 
 -- --------------------------------------------------------
 
