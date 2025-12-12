@@ -51,7 +51,30 @@ function submitOrder() {
     formData.append('method', method);
     formData.append('pax', pax);
 
-    // --- E-Wallet 验证逻辑 ---
+    // 🌟🌟🌟 NEW DELIVERY LOGIC ADDED HERE 🌟🌟🌟
+    // Only runs if the user is in "Delivery" mode
+    if (table === "Delivery") {
+        var addressElem = document.getElementById('delivery_address');
+        var contactElem = document.getElementById('contact_number');
+        
+        // Ensure these input fields actually exist on the page
+        if (addressElem && contactElem) {
+            var address = addressElem.value.trim();
+            var phone = contactElem.value.trim();
+
+            if (address === "" || phone === "") {
+                alert("Please fill in Delivery Address and Contact Number.");
+                return; // Stop here if empty
+            }
+
+            // Append to formData so PHP can read $_POST['address'] and $_POST['phone']
+            formData.append('address', address);
+            formData.append('phone', phone);
+        }
+    }
+    // 🌟🌟🌟 END OF DELIVERY LOGIC 🌟🌟🌟
+
+    // --- E-Wallet Logic ---
     if (method === 'E-wallet') {
         var country = document.getElementById('country_code').value;
         var phoneRaw = document.getElementById('ewallet_phone').value;
@@ -96,8 +119,7 @@ function submitOrder() {
             return;
         }
         
-        // 🌟 验证：必须是数字，且长度大于 9 位 (即 10 位或更多)
-        // \d{10,} 意思是：数字，重复10次或更多
+        // Validation: Must be digits and longer than 9
         if(!/^\d{10,}$/.test(acc)) {
             alert("Bank Account Number must be numeric and longer than 9 digits.");
             return;
@@ -121,14 +143,9 @@ function submitOrder() {
         if (data.status === 'success') {
             closeModal('modal-checkout');
             
-            // 🌟🌟🌟 修改点：这里删除了 deleteCookie 和 setTimeout 🌟🌟🌟
-            // 也就是说，座位和人数会被保留，用户需要手动点击 "Back to Home"
-
             var successContainer = document.getElementById('success-message-container');
             var title = document.getElementById('success-title');
             var icon = document.getElementById('success-icon');
-            
-            // 移除了 "System will refresh..." 的提示文字
             
             if(data.payment_status === 'Pending') {
                 icon.innerHTML = "📝";
@@ -149,8 +166,6 @@ function submitOrder() {
             }
 
             document.getElementById('modal-success').style.display = 'flex';
-            
-            // 🌟 不再自动跳转，让用户停留在成功页面，直到他们自己点击按钮
         } else {
             alert('Error: ' + data.message);
         }
