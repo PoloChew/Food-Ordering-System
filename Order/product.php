@@ -253,12 +253,25 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
             return "";
         }
 
+        // 🌟🌟🌟 MODIFIED LOGIC: No initial popup for delivery 🌟🌟🌟
         window.onload = function() {
-            if (getCookie("popup_shown") === "") {
+            // Check if user came from "Delivery" button
+            if (orderType === 'delivery') {
+                // Silently set cookies needed for Cart page
+                setCookie("popup_shown", "true", 5);
+                setCookie("user_seat", "Delivery", 120); 
+                setCookie("user_pax", "1", 120);
+                
+                // Update the header display text
+                var seatDisplay = document.getElementById('header-seat-display');
+                if(seatDisplay) {
+                    seatDisplay.innerText = "🛵 Delivery";
+                }
+            } 
+            // Only show modal for Dine-in
+            else if (getCookie("popup_shown") === "") {
                 if (orderType === 'dinein') {
                     document.getElementById('modal-dinein').style.display = 'flex';
-                } else if (orderType === 'delivery') { // Check for 'delivery'
-                    document.getElementById('modal-delivery').style.display = 'flex';
                 }
             }
         };
@@ -271,13 +284,9 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
                 setCookie("user_pax", pax, 120); 
                 setCookie("user_seat", selectedSeat, 120);
                 document.getElementById('header-seat-display').innerText = "🪑 " + selectedSeat + " 👥" + pax;
-            
-            } else if (modalId === 'modal-delivery') { // Handle delivery close logic
-                setCookie("popup_shown", "true", 5);
-                setCookie("user_seat", "Delivery", 120); // Set cookie to 'Delivery'
-                setCookie("user_pax", "1", 120);
-                document.getElementById('header-seat-display').innerText = "🛵 Delivery";
             }
+            
+            // Just hide the modal
             document.getElementById(modalId).style.display = 'none';
         }
 

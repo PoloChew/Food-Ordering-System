@@ -148,21 +148,46 @@ function submitOrder() {
             var icon = document.getElementById('success-icon');
             
             if(data.payment_status === 'Pending') {
+                // 现金支付情况
                 icon.innerHTML = "📝";
                 title.innerText = "Order Pending Payment";
                 title.style.color = "#d4af37";
-                successContainer.innerHTML = `
-                    <p style="color: #fff; font-size: 18px; margin-bottom: 10px;">Please proceed to the counter to pay.</p>
-                    <p style="color: #aebcb9;">Enjoy your meal and welcome again!</p>
-                `;
+                
+                // 如果是 Delivery 且选了现金支付 (虽然通常 Delivery 需要预付，但以防万一保留逻辑)
+                if (table === "Delivery") {
+                    successContainer.innerHTML = `
+                        <p style="color: #fff; font-size: 18px; margin-bottom: 10px;">Order Received.</p>
+                        <p style="color: #d4af37; font-weight: bold;">🛵 Est. Delivery: 30-45 Mins</p>
+                        <p style="color: #aebcb9; font-size: 14px;">Please pay upon delivery.</p>
+                    `;
+                } else {
+                    successContainer.innerHTML = `
+                        <p style="color: #fff; font-size: 18px; margin-bottom: 10px;">Please proceed to the counter to pay.</p>
+                        <p style="color: #aebcb9;">Enjoy your meal and welcome again!</p>
+                    `;
+                }
+
             } else {
+                // 电子支付成功情况
                 icon.innerHTML = "🎉";
                 title.innerText = "Payment Successful!";
                 title.style.color = "#4CAF50";
-                successContainer.innerHTML = `
-                    <p style="color: #aebcb9;">Thank you for dining with TAR UMT Cafe.</p>
-                    <p style="color: #aebcb9;">The kitchen is preparing your meal.</p>
-                `;
+                
+                // 🌟🌟🌟 这里是重点修改：区分 Delivery 和 Dine-in 的显示信息 🌟🌟🌟
+                if (table === "Delivery") {
+                    successContainer.innerHTML = `
+                        <p style="color: #fff; font-size: 16px; margin-bottom: 5px;">Thank you for your order!</p>
+                        <p style="color: #d4af37; font-size: 20px; font-weight: bold; margin: 15px 0;">
+                            🛵 Est. Delivery Time: <br>30 - 45 Mins
+                        </p>
+                        <p style="color: #aebcb9; font-size: 14px;">We will process your delivery shortly.</p>
+                    `;
+                } else {
+                    successContainer.innerHTML = `
+                        <p style="color: #aebcb9;">Thank you for dining with TAR UMT Cafe.</p>
+                        <p style="color: #aebcb9;">The kitchen is preparing your meal.</p>
+                    `;
+                }
             }
 
             document.getElementById('modal-success').style.display = 'flex';
