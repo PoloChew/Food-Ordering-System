@@ -179,7 +179,7 @@ switch ($currentMonth) {
         <div class="action-area">
             <h2 style="font-size: 18px; margin-bottom: 25px; color: #aebcb9; font-weight: normal;">Please select your dining preference</h2>
             <a href="Order/product.php?type=dinein" class="btn">🍽️ Dine In</a>
-            <a href="Order/product.php?type=takeaway" class="btn">🛍️ Take Away</a>
+            <a href="Order/product.php?type=delivery" class="btn">🛵 Delivery</a>
         </div>
     </div>
 
@@ -241,7 +241,8 @@ switch ($currentMonth) {
             
             // Set links to go directly to that category on the menu
             document.getElementById('linkDine').href = "Order/product.php?type=dinein&category_id=" + categoryId;
-            document.getElementById('linkTake').href = "Order/product.php?type=takeaway&category_id=" + categoryId;
+            // CHANGED: Link type to delivery
+            document.getElementById('linkTake').href = "Order/product.php?type=delivery&category_id=" + categoryId;
         }
 
         function closeIntro() {
@@ -267,7 +268,7 @@ switch ($currentMonth) {
             
             <div class="intro-buttons">
                 <a id="linkDine" href="#" class="intro-btn btn-dine">🍽️ Dine In</a>
-                <a id="linkTake" href="#" class="intro-btn btn-take">🛍️ Take Away</a>
+                <a id="linkTake" href="#" class="intro-btn btn-take">🛵 Delivery</a>
             </div>
         </div>
     </div>

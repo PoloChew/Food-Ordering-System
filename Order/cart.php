@@ -88,7 +88,7 @@ $grandTotal = $subtotal + $tax;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My cart - TAr UMT Cafe</title>
+    <title>My cart - TAR UMT Cafe</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/751/751621.png">
     <link rel="stylesheet" href="../css/cart.css">
     
@@ -242,10 +242,21 @@ $grandTotal = $subtotal + $tax;
             </div>
 
             <div class="form-group">
-                <label>Table Number</label>
+                <label>Table / Mode</label>
                 <input type="text" id="table_num" class="form-input" value="<?= htmlspecialchars($userSeat) ?>" readonly style="background: rgba(255,255,255,0.1); color: #8faaa5; cursor: not-allowed;">
             </div>
 
+            <?php if ($userSeat === 'Delivery'): ?>
+                <div class="form-group" style="border: 1px solid #2e7d6f; padding: 10px; border-radius: 8px; background: rgba(46, 125, 111, 0.1); margin-bottom: 15px;">
+                    <label style="color: #d4af37; font-size: 16px; margin-bottom: 10px; display:block;">🛵 Delivery Details</label>
+                    
+                    <label style="font-size: 13px;">Contact Number</label>
+                    <input type="text" id="contact_number" class="form-input" placeholder="e.g. 012-3456789" style="margin-bottom: 10px;">
+
+                    <label style="font-size: 13px;">Delivery Address</label>
+                    <textarea id="delivery_address" class="form-input" rows="3" placeholder="Enter your full address here..."></textarea>
+                </div>
+            <?php endif; ?>
             <div class="form-group">
                 <label>Payment Method</label>
                 <select id="payment_method" class="form-input" onchange="togglePaymentFields()">

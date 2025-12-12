@@ -123,12 +123,13 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
         </div>
     </div>
 
-    <div id="modal-takeaway" class="modal-overlay">
+    <div id="modal-delivery" class="modal-overlay">
         <div class="modal-box">
-            <div class="modal-title">Takeaway Counter 🛍️</div>
-            <p>Please proceed to <strong>Counter 2</strong> to collect your order.</p>
-            <p style="color: #d4af37; font-size: 24px; font-weight: bold; margin-top: 10px;">Waiting Time: ~15 mins</p>
-            <button class="close-modal" onclick="closeModal('modal-takeaway')">🚀 Start Ordering</button>
+            <div class="modal-title">Delivery Service 🛵</div>
+            <p>We deliver straight to your doorstep!</p>
+            <p style="color: #aebcb9; font-size: 14px; margin-top: 5px;">You will need to provide your <strong>Address</strong> and <strong>Phone Number</strong> during checkout.</p>
+            <p style="color: #d4af37; font-size: 24px; font-weight: bold; margin-top: 10px;">Est. Time: ~30-45 mins</p>
+            <button class="close-modal" onclick="closeModal('modal-delivery')">🚀 Start Ordering</button>
         </div>
     </div>
 
@@ -236,10 +237,12 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
     <script>
         var orderType = "<?= $type ?>";
         var selectedSeat = ""; 
+
         function setCookie(cname, cvalue, minutes) {
             const d = new Date(); d.setTime(d.getTime() + (minutes * 60 * 1000));
             document.cookie = cname + "=" + cvalue + ";expires="+ d.toUTCString() + ";path=/";
         }
+
         function getCookie(cname) {
             let name = cname + "="; let decodedCookie = decodeURIComponent(document.cookie);
             let ca = decodedCookie.split(';');
@@ -249,12 +252,17 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
             }
             return "";
         }
+
         window.onload = function() {
             if (getCookie("popup_shown") === "") {
-                if (orderType === 'dinein') document.getElementById('modal-dinein').style.display = 'flex';
-                else if (orderType === 'takeaway') document.getElementById('modal-takeaway').style.display = 'flex';
+                if (orderType === 'dinein') {
+                    document.getElementById('modal-dinein').style.display = 'flex';
+                } else if (orderType === 'delivery') { // Check for 'delivery'
+                    document.getElementById('modal-delivery').style.display = 'flex';
+                }
             }
         };
+
         function closeModal(modalId) {
             if(modalId === 'modal-dinein') {
                 if (selectedSeat === "") { alert("Please select a seat to continue!"); return; }
@@ -263,14 +271,16 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
                 setCookie("user_pax", pax, 120); 
                 setCookie("user_seat", selectedSeat, 120);
                 document.getElementById('header-seat-display').innerText = "🪑 " + selectedSeat + " 👥" + pax;
-            } else if (modalId === 'modal-takeaway') {
+            
+            } else if (modalId === 'modal-delivery') { // Handle delivery close logic
                 setCookie("popup_shown", "true", 5);
-                setCookie("user_seat", "Takeaway", 120);
+                setCookie("user_seat", "Delivery", 120); // Set cookie to 'Delivery'
                 setCookie("user_pax", "1", 120);
-                document.getElementById('header-seat-display').innerText = "🛍️ Takeaway";
+                document.getElementById('header-seat-display').innerText = "🛵 Delivery";
             }
             document.getElementById(modalId).style.display = 'none';
         }
+
         function selectSeat(seatNum, element) {
             selectedSeat = seatNum;
             document.getElementById('selected-seat-msg').innerText = "Selected Seat: " + seatNum;
@@ -278,6 +288,7 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
             allSeats.forEach(function(s) { s.classList.remove('selected'); });
             element.classList.add('selected');
         }
+
         function openProductDetail(card) {
             var id = card.getAttribute('data-id');
             var name = card.getAttribute('data-name');
@@ -292,6 +303,7 @@ function buildUrl($newPage) { $params = $_GET; $params['page'] = $newPage; retur
             document.getElementById('detail-qty').value = 1; 
             document.getElementById('modal-product-detail').style.display = 'flex';
         }
+
         function addToCart() {
             var productId = document.getElementById('detail-id').value;
             var quantity = document.getElementById('detail-qty').value;
