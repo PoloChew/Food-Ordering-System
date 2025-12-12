@@ -143,7 +143,7 @@ function submitOrder() {
                 title.innerText = "Payment Successful!";
                 title.style.color = "#4CAF50";
                 successContainer.innerHTML = `
-                    <p style="color: #aebcb9;">Thank you for dining with Nordic Taste.</p>
+                    <p style="color: #aebcb9;">Thank you for dining with TAR UMT Cafe.</p>
                     <p style="color: #aebcb9;">The kitchen is preparing your meal.</p>
                 `;
             }

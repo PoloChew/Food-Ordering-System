@@ -118,10 +118,7 @@ switch ($currentMonth) {
         <div class="system-intro">
             <h2>About The System</h2>
             <p>
-                This <strong>Food Ordering System</strong> is designed to streamline the culinary journey. 
-                Whether you are craving an immersive <strong>Dine-in</strong> experience under the northern lights 
-                or a swift <strong>Takeaway</strong> for your urban adventures, our platform ensures a seamless, 
-                efficient, and elegant ordering process.
+                This <strong>Food Ordering System</strong> is designed to simplify your dining experience. Whether you want to enjoy an immersive <strong>Dine-in</strong> experience or quickly <strong>Delivery</strong>, our platform ensures a smooth, efficient, and convenient ordering experience.
             </p>
             <p style="margin-top: 15px; font-size: 14px; opacity: 0.7;">
                 Developed as part of the Diploma in Information Technology curriculum, blending coding skills with user experience design.
