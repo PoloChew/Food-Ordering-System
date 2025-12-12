@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 12, 2025 at 07:14 AM
+-- Generation Time: Dec 12, 2025 at 02:37 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -94,6 +94,8 @@ CREATE TABLE `orders` (
   `OrderDate` timestamp NOT NULL DEFAULT current_timestamp(),
   `TotalAmount` decimal(10,2) NOT NULL,
   `CustomerName` varchar(100) NOT NULL,
+  `DeliveryAddress` text DEFAULT NULL,
+  `PhoneNumber` varchar(20) DEFAULT NULL,
   `TableNumber` varchar(50) NOT NULL,
   `Pax` int(11) NOT NULL DEFAULT 1,
   `PaymentMethod` varchar(50) NOT NULL,
@@ -195,7 +197,8 @@ ALTER TABLE `category`
 --
 ALTER TABLE `orderitems`
   ADD PRIMARY KEY (`OrderItemID`),
-  ADD KEY `OrderID` (`OrderID`);
+  ADD KEY `OrderID` (`OrderID`),
+  ADD KEY `fk_orderitems_product` (`ProductID`);
 
 --
 -- Indexes for table `orders`
@@ -260,6 +263,13 @@ ALTER TABLE `product`
 ALTER TABLE `cartitems`
   ADD CONSTRAINT `cartitems_ibfk_1` FOREIGN KEY (`CartID`) REFERENCES `cart` (`CartID`) ON DELETE CASCADE,
   ADD CONSTRAINT `cartitems_ibfk_2` FOREIGN KEY (`ProductID`) REFERENCES `product` (`ProductID`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `orderitems`
+--
+ALTER TABLE `orderitems`
+  ADD CONSTRAINT `fk_orderitems_orders` FOREIGN KEY (`OrderID`) REFERENCES `orders` (`OrderID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_orderitems_product` FOREIGN KEY (`ProductID`) REFERENCES `product` (`ProductID`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `product`
