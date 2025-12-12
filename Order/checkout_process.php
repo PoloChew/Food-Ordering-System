@@ -123,6 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $response['status'] = 'success';
         $response['message'] = 'Order placed successfully!';
         $response['payment_status'] = $orderStatus; 
+        $response['order_id'] = $orderID; // <--- Add this line
 
     } catch (Exception $e) {
         if ($pdo->inTransaction()) {

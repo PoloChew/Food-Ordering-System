@@ -51,28 +51,23 @@ function submitOrder() {
     formData.append('method', method);
     formData.append('pax', pax);
 
-    // 🌟🌟🌟 NEW DELIVERY LOGIC ADDED HERE 🌟🌟🌟
-    // Only runs if the user is in "Delivery" mode
+    // 🌟🌟🌟 DELIVERY LOGIC 🌟🌟🌟
     if (table === "Delivery") {
         var addressElem = document.getElementById('delivery_address');
         var contactElem = document.getElementById('contact_number');
         
-        // Ensure these input fields actually exist on the page
         if (addressElem && contactElem) {
             var address = addressElem.value.trim();
             var phone = contactElem.value.trim();
 
             if (address === "" || phone === "") {
                 alert("Please fill in Delivery Address and Contact Number.");
-                return; // Stop here if empty
+                return; 
             }
-
-            // Append to formData so PHP can read $_POST['address'] and $_POST['phone']
             formData.append('address', address);
             formData.append('phone', phone);
         }
     }
-    // 🌟🌟🌟 END OF DELIVERY LOGIC 🌟🌟🌟
 
     // --- E-Wallet Logic ---
     if (method === 'E-wallet') {
@@ -119,7 +114,6 @@ function submitOrder() {
             return;
         }
         
-        // Validation: Must be digits and longer than 9
         if(!/^\d{10,}$/.test(acc)) {
             alert("Bank Account Number must be numeric and longer than 9 digits.");
             return;
@@ -147,35 +141,53 @@ function submitOrder() {
             var title = document.getElementById('success-title');
             var icon = document.getElementById('success-icon');
             
+            // 🌟🌟🌟 NEW: Generate Receipt Button HTML 🌟🌟🌟
+            // Requires 'data.order_id' from checkout_process.php
+            var receiptBtnHtml = `
+                <div style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                    <a href="receipt.php?order_id=${data.order_id}" target="_blank" style="
+                        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+                        background: #d4af37; color: #000; padding: 12px 30px; 
+                        border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 16px;
+                        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); transition: transform 0.2s;
+                    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        📄 Download Receipt
+                    </a>
+                </div>
+            `;
+
             if(data.payment_status === 'Pending') {
-                // 现金支付情况
+                // Case: Cash Payment (Unpaid)
                 icon.innerHTML = "📝";
                 title.innerText = "Order Pending Payment";
                 title.style.color = "#d4af37";
                 
-                // 如果是 Delivery 且选了现金支付 (虽然通常 Delivery 需要预付，但以防万一保留逻辑)
+                var msgHtml = "";
                 if (table === "Delivery") {
-                    successContainer.innerHTML = `
+                    msgHtml = `
                         <p style="color: #fff; font-size: 18px; margin-bottom: 10px;">Order Received.</p>
                         <p style="color: #d4af37; font-weight: bold;">🛵 Est. Delivery: 30-45 Mins</p>
-                        <p style="color: #aebcb9; font-size: 14px;">Please pay upon delivery.</p>
+                        <p style="color: #aebcb9; font-size: 14px;">Please pay cash upon delivery.</p>
                     `;
                 } else {
-                    successContainer.innerHTML = `
+                    msgHtml = `
                         <p style="color: #fff; font-size: 18px; margin-bottom: 10px;">Please proceed to the counter to pay.</p>
                         <p style="color: #aebcb9;">Enjoy your meal and welcome again!</p>
                     `;
                 }
+                
+                // Append message + Receipt Button
+                successContainer.innerHTML = msgHtml + receiptBtnHtml;
 
             } else {
-                // 电子支付成功情况
+                // Case: Online Payment (Paid)
                 icon.innerHTML = "🎉";
                 title.innerText = "Payment Successful!";
                 title.style.color = "#4CAF50";
                 
-                // 🌟🌟🌟 这里是重点修改：区分 Delivery 和 Dine-in 的显示信息 🌟🌟🌟
+                var msgHtml = "";
                 if (table === "Delivery") {
-                    successContainer.innerHTML = `
+                    msgHtml = `
                         <p style="color: #fff; font-size: 16px; margin-bottom: 5px;">Thank you for your order!</p>
                         <p style="color: #d4af37; font-size: 20px; font-weight: bold; margin: 15px 0;">
                             🛵 Est. Delivery Time: <br>30 - 45 Mins
@@ -183,11 +195,14 @@ function submitOrder() {
                         <p style="color: #aebcb9; font-size: 14px;">We will process your delivery shortly.</p>
                     `;
                 } else {
-                    successContainer.innerHTML = `
+                    msgHtml = `
                         <p style="color: #aebcb9;">Thank you for dining with TAR UMT Cafe.</p>
                         <p style="color: #aebcb9;">The kitchen is preparing your meal.</p>
                     `;
                 }
+
+                // Append message + Receipt Button
+                successContainer.innerHTML = msgHtml + receiptBtnHtml;
             }
 
             document.getElementById('modal-success').style.display = 'flex';
